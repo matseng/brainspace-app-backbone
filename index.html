@@ -4,10 +4,15 @@
     <link href="styles/app.css" rel="stylesheet" type="text/css" media="screen">
   </head>
   <body>
-    <h1> BrainSpace 2</h1>
+    <h1> BrainSpace</h1>
+    <form id="addNote">
+      <input name='text' type="text" placeholder="Your new note">
+      <input name='username' type="text" placeholder="Your name">
+      <input type="submit" value="Add note">
+    </form>
     <div class='nodes'> </div>
-    <script id="personTemplate" type="text/template"> 
-      <strong><%= name %> </strong> (<%= school %>)
+    <script id="nodeTemplate" type="text/template"> 
+      <strong><span><%= text %></span></strong> (<%= name %>) <button class="edit">Edit</edit> <button class="delete">Delete</button>
     </script>
     <script src="lib/jquery.js"></script>
     <script src="lib/underscore.js"></script>

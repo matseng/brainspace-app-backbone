@@ -4,7 +4,7 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   (function() {
-    var nodeCollection, nodeCollectionView;
+    var addNode, nodeCollection, nodeCollectionView;
     window.App = {
       Models: {},
       Collections: {},
@@ -20,6 +20,12 @@
         return Node.__super__.constructor.apply(this, arguments);
       }
 
+      Node.prototype.validate = function(attrs) {
+        if (attrs.text === null) {
+          return "Text requires a valid string";
+        }
+      };
+
       return Node;
 
     })(Backbone.Model);
@@ -32,8 +38,39 @@
 
       Node.prototype.tagName = 'li';
 
+      Node.prototype.template = template('nodeTemplate');
+
+      Node.prototype.initialize = function() {
+        this.model.on('change', this.render, this);
+        return this.model.on('destroy', this.remove, this);
+      };
+
+      Node.prototype.events = {
+        'click .edit': 'editNode',
+        'click .delete': 'deleteNode'
+      };
+
+      Node.prototype.editNode = function() {
+        var newText;
+        newText = prompt("Edit the text:", this.model.get('text'));
+        if (newText === null) {
+          return;
+        }
+        return this.model.set('text', newText);
+      };
+
+      Node.prototype.deleteNode = function() {
+        return this.model.destroy();
+      };
+
+      Node.prototype.remove = function() {
+        return this.$el.remove();
+      };
+
       Node.prototype.render = function() {
-        this.$el.html(this.model.get('name'));
+        var template;
+        template = this.template(this.model.toJSON());
+        this.$el.html(template);
         return this;
       };
 
@@ -61,6 +98,10 @@
 
       NodesCollection.prototype.tagName = 'div';
 
+      NodesCollection.prototype.initialize = function() {
+        return this.collection.on('add', this.addOne, this);
+      };
+
       NodesCollection.prototype.render = function() {
         this.collection.each(this.addOne, this);
         return this;
@@ -77,6 +118,39 @@
       return NodesCollection;
 
     })(Backbone.View);
+    App.Views.AddNode = (function(_super) {
+      __extends(AddNode, _super);
+
+      function AddNode() {
+        return AddNode.__super__.constructor.apply(this, arguments);
+      }
+
+      AddNode.prototype.el = '#addNote';
+
+      AddNode.prototype.events = {
+        'submit': 'submit'
+      };
+
+      AddNode.prototype.initialize = function() {
+        return console.log(this.el.innerHTML);
+      };
+
+      AddNode.prototype.submit = function(e) {
+        var node, text, username;
+        e.preventDefault();
+        text = $(e.currentTarget).find('input[name=text]').val();
+        console.log(text);
+        username = $(e.currentTarget).find('input[name=username]').val();
+        node = new App.Models.Node({
+          text: text,
+          username: username
+        });
+        return this.collection.add(node);
+      };
+
+      return AddNode;
+
+    })(Backbone.View);
     nodeCollection = new App.Collections.Nodes([
       {
         name: "Mike T",
@@ -89,6 +163,9 @@
         text: "Hey bros"
       }
     ]);
+    addNode = new App.Views.AddNode({
+      collection: nodeCollection
+    });
     nodeCollectionView = new App.Views.NodesCollection({
       collection: nodeCollection
     });
