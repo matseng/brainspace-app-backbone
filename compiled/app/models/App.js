@@ -92,7 +92,7 @@
     nodeCollectionView = new App.Views.NodesCollection({
       collection: nodeCollection
     });
-    return console.log(nodeCollectionView.render().el);
+    return $(".nodes").append(nodeCollectionView.render().el);
   })();
 
 }).call(this);

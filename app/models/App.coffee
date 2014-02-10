@@ -46,8 +46,11 @@
 
   #nodeView = new App.Views.Node({model: node})
   nodeCollectionView = new App.Views.NodesCollection({collection: nodeCollection})
+  $(".nodes").append(nodeCollectionView.render().el)
 
-  console.log(nodeCollectionView.render().el)
+  # $(document).ready(() ->
+  #   debugger
+  #   $(".nodes").append(nodeCollectionView.render().el)
 
 )()
 
