@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "CardSpec.js",
+  "sourceRoot": "../..",
+  "sources": [
+    "spec/CardSpec.coffee"
+  ],
+  "names": [],
+  "mappings": ";AAAA;AAAA,EAAA,QAAA,CAAS,kBAAT,EAA6B,SAAA,GAAA;WAE3B,EAAA,CAAG,iCAAH,EAAsC,SAAA,GAAA;AACpC,UAAA,UAAA;AAAA,MAAA,UAAA,GAAiB,IAAA,IAAA,CAAA,CAAjB,CAAA;aACA,MAAA,CAAO,UAAU,CAAC,MAAlB,CAAyB,CAAC,IAA1B,CAA+B,EAA/B,EAFoC;IAAA,CAAtC,EAF2B;EAAA,CAA7B,CAAA,CAAA;AAAA"
+}

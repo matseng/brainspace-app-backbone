@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "BlackjackViewSpec.js",
+  "sourceRoot": "../..",
+  "sources": [
+    "spec/BlackjackViewSpec.coffee"
+  ],
+  "names": [],
+  "mappings": ";AAmB6C;AAAA;AAAA"
+}
