@@ -143,7 +143,7 @@
         username = $(e.currentTarget).find('input[name=username]').val();
         node = new App.Models.Node({
           text: text,
-          username: username
+          username: username || 'anonymous'
         });
         return this.collection.add(node);
       };
@@ -153,13 +153,13 @@
     })(Backbone.View);
     nodeCollection = new App.Collections.Nodes([
       {
-        name: "Mike T",
+        username: "Mike T",
         text: "Hello World"
       }, {
-        name: "Peter T",
+        username: "Peter T",
         text: "What's up?"
       }, {
-        name: "Jossy",
+        username: "Jossy",
         text: "Hey bros"
       }
     ]);
