@@ -8,11 +8,30 @@
     window.App = {
       Models: {},
       Collections: {},
-      Views: {}
+      Views: {},
+      selectedNode: null
     };
     window.template = function(id) {
       return _.template($("#" + id).html());
     };
+    $(document.body).mousemove(function(event) {
+      var selectedNode;
+      event.preventDefault();
+      if (window.App.selectedNode) {
+        selectedNode = window.App.selectedNode;
+        console.log(selectedNode);
+        selectedNode.set({
+          top: event.pageY
+        });
+        return selectedNode.set({
+          left: event.pageX
+        });
+      }
+    });
+    $(document.body).on("mouseup", function(event) {
+      console.log("mouseup... up and away: " + window.App.selectedNode.toJSON());
+      return window.App.selectedNode = null;
+    });
     App.Models.Node = (function(_super) {
       __extends(Node, _super);
 
@@ -22,7 +41,9 @@
 
       Node.prototype.defaults = {
         username: "Mikey Testing T",
-        text: 'Hack Reactor'
+        text: 'Hack Reactor',
+        top: null,
+        left: null
       };
 
       Node.prototype.validate = function(attrs) {
@@ -52,7 +73,13 @@
 
       Node.prototype.events = {
         'click .edit': 'editNode',
-        'click .delete': 'deleteNode'
+        'click .delete': 'deleteNode',
+        'mousedown span': 'mouseDownSelectNode'
+      };
+
+      Node.prototype.mouseDownSelectNode = function(e) {
+        e.preventDefault();
+        return window.App.selectedNode = this.model;
       };
 
       Node.prototype.editNode = function() {
@@ -77,9 +104,17 @@
       };
 
       Node.prototype.render = function() {
-        var template;
+        var position, template, x, y;
+        x = this.model.get("left");
+        y = this.model.get('top');
+        position = {
+          top: y + "px",
+          left: x + "px"
+        };
         template = this.template(this.model.toJSON());
         this.$el.html(template);
+        this.$el.css('position', 'absolute');
+        this.$el.css(position);
         return this;
       };
 
@@ -127,8 +162,6 @@
         return this.$el.prepend(nodeView.render().el);
       };
 
-      NodesCollection.prototype.removeOne = function(mod, coll, opt) {};
-
       return NodesCollection;
 
     })(Backbone.View);
@@ -151,7 +184,7 @@
         text = $(e.currentTarget).find('input[name=text]').val();
         username = $(e.currentTarget).find('input[name=username]').val();
         node = new App.Models.Node({
-          text: text || "",
+          text: text || "empty",
           username: username || 'anonymous'
         });
         return this.collection.add(node);

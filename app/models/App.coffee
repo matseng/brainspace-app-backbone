@@ -3,10 +3,25 @@
     Models: {}
     Collections: {}
     Views: {}
+    selectedNode: null
   }
 
   window.template = (id) ->
     _.template($("#" + id).html())
+
+  $(document.body).mousemove( (event) -> 
+    event.preventDefault()
+    if(window.App.selectedNode)
+      selectedNode = window.App.selectedNode
+      console.log(selectedNode)
+      selectedNode.set({top: event.pageY})
+      selectedNode.set({left: event.pageX})
+  )
+
+  $(document.body).on("mouseup", (event) -> 
+    console.log("mouseup... up and away: " + window.App.selectedNode.toJSON());
+    window.App.selectedNode = null;
+  )
 
   class App.Models.Node extends Backbone.Model
   #class App.Models.Node extends Backbone.Firebase.Model
@@ -14,6 +29,8 @@
     defaults: {
     username: "Mikey Testing T"
     text: 'Hack Reactor'
+    top: null
+    left: null
     }
     validate: (attrs) ->
       if attrs.text is null
@@ -27,11 +44,17 @@
     initialize: () ->
       @.model.on('change', @.render, @)
       @.model.on('destroy', @.remove, @)
+      #@.model.on('mousedown', @.mouseDownSelectNode, @)
 
     events: {
       'click .edit': 'editNode'
       'click .delete': 'deleteNode'
+      'mousedown span': 'mouseDownSelectNode'
     }
+
+    mouseDownSelectNode: (e) ->
+      e.preventDefault()
+      window.App.selectedNode = @.model
 
     editNode: () ->
       newText = prompt("Edit the text:", @.model.get('text'))
@@ -49,8 +72,18 @@
       @.$el.remove()
 
     render: () ->
+      x = @.model.get("left")
+      y = @.model.get('top')
+      position = {
+        top: y + "px"
+        left: x + "px"
+      }
+      
       template = @.template(@.model.toJSON())
       @.$el.html(template)
+
+      @.$el.css('position', 'absolute')
+      @.$el.css(position)
       @
 
   #class App.Collections.Nodes extends Backbone.Collection
@@ -74,10 +107,6 @@
       nodeView = new App.Views.Node({model: node})
       @.$el.prepend(nodeView.render().el)
 
-    removeOne: (mod, coll, opt) ->
-      #debugger;
-      #node.$el.detach()
-
   class App.Views.AddNode extends Backbone.View
     el: '#addNote'
     
@@ -94,7 +123,7 @@
       #console.log(text)
       username = $(e.currentTarget).find('input[name=username]').val()
       node = new App.Models.Node({
-        text: text || ""
+        text: text || "empty"
         username: username || 'anonymous'
       })
       @.collection.add(node)
