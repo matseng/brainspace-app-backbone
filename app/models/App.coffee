@@ -41,15 +41,14 @@
       currentNode = @.model
       currentNode.set({'text': newText})
 
-    deleteNode: (test) ->
-      @.model.destroy( (test) -> 
-        console.log("Here in App.Views.Node: " + test))
+    deleteNode: () ->
+      @.$el.detach()  #as below, this is a workaround
+      @.model.collection.remove(@.model)  #destroy method is not working well with firebase
 
     remove: () ->
       @.$el.remove()
 
     render: () ->
-      #debugger;
       template = @.template(@.model.toJSON())
       @.$el.html(template)
       @
@@ -64,6 +63,7 @@
 
     initialize: () ->
       @.collection.on('add', @.addOne, @)
+      @.collection.on('remove', @.removeOne, @)
 
     render: () ->
       @.collection.each(@.addOne, @)
@@ -73,6 +73,10 @@
       #console.log(node.toJSON())
       nodeView = new App.Views.Node({model: node})
       @.$el.prepend(nodeView.render().el)
+
+    removeOne: (mod, coll, opt) ->
+      #debugger;
+      #node.$el.detach()
 
   class App.Views.AddNode extends Backbone.View
     el: '#addNote'

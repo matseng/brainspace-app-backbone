@@ -67,10 +67,9 @@
         });
       };
 
-      Node.prototype.deleteNode = function(test) {
-        return this.model.destroy(function(test) {
-          return console.log("Here in App.Views.Node: " + test);
-        });
+      Node.prototype.deleteNode = function() {
+        this.$el.detach();
+        return this.model.collection.remove(this.model);
       };
 
       Node.prototype.remove = function() {
@@ -111,7 +110,8 @@
       NodesCollection.prototype.tagName = 'div';
 
       NodesCollection.prototype.initialize = function() {
-        return this.collection.on('add', this.addOne, this);
+        this.collection.on('add', this.addOne, this);
+        return this.collection.on('remove', this.removeOne, this);
       };
 
       NodesCollection.prototype.render = function() {
@@ -126,6 +126,8 @@
         });
         return this.$el.prepend(nodeView.render().el);
       };
+
+      NodesCollection.prototype.removeOne = function(mod, coll, opt) {};
 
       return NodesCollection;
 
