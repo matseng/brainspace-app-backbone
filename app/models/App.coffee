@@ -13,13 +13,13 @@
     event.preventDefault()
     if(window.App.selectedNode)
       selectedNode = window.App.selectedNode
-      console.log(selectedNode)
+      #console.log(selectedNode)
       selectedNode.set({top: event.pageY})
       selectedNode.set({left: event.pageX})
   )
 
   $(document.body).on("mouseup", (event) -> 
-    console.log("mouseup... up and away: " + window.App.selectedNode.toJSON());
+    #console.log("mouseup... up and away: " + window.App.selectedNode.toJSON());
     window.App.selectedNode = null;
   )
 
@@ -65,10 +65,12 @@
       currentNode.set({'text': newText})
 
     deleteNode: () ->
-      @.$el.detach()  #as below, this is a workaround
+      #@.model.destroy()  #this destroy methods throws an error!!!
+      #@.$el.detach()  #as below, this is a workaround, but it doesn't sync changes to other users
       @.model.collection.remove(@.model)  #destroy method is not working well with firebase
 
     remove: () ->
+      debugger
       @.$el.remove()
 
     render: () ->
@@ -105,7 +107,13 @@
     addOne: (node) ->
       #console.log(node.toJSON())
       nodeView = new App.Views.Node({model: node})
+      #debugger
+      nodeView.$el.attr("id", node.id)
       @.$el.prepend(nodeView.render().el)
+
+    removeOne: (model, coll, opt) ->
+      #debugger
+      $("#" + model.id).detach()
 
   class App.Views.AddNode extends Backbone.View
     el: '#addNote'
@@ -136,9 +144,9 @@
   # ])
 
   #nodeView = new App.Views.Node({model: new App.Model.Node()})
-  collectionView = new App.Collections.Nodes()
-  addNodeView = new App.Views.AddNode({collection: collectionView})
-  nodeCollectionView = new App.Views.NodesCollection({collection: collectionView})
+  collectionNodes = new App.Collections.Nodes()
+  addNodeView = new App.Views.AddNode({collection: collectionNodes})
+  nodeCollectionView = new App.Views.NodesCollection({collection: collectionNodes})
   $(".nodes").append(nodeCollectionView.render().el)
 
   # $(document).ready(() ->

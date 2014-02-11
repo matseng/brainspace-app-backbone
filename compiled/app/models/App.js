@@ -4,7 +4,7 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   (function() {
-    var addNodeView, collectionView, nodeCollectionView;
+    var addNodeView, collectionNodes, nodeCollectionView;
     window.App = {
       Models: {},
       Collections: {},
@@ -19,7 +19,6 @@
       event.preventDefault();
       if (window.App.selectedNode) {
         selectedNode = window.App.selectedNode;
-        console.log(selectedNode);
         selectedNode.set({
           top: event.pageY
         });
@@ -29,7 +28,6 @@
       }
     });
     $(document.body).on("mouseup", function(event) {
-      console.log("mouseup... up and away: " + window.App.selectedNode.toJSON());
       return window.App.selectedNode = null;
     });
     App.Models.Node = (function(_super) {
@@ -95,11 +93,11 @@
       };
 
       Node.prototype.deleteNode = function() {
-        this.$el.detach();
         return this.model.collection.remove(this.model);
       };
 
       Node.prototype.remove = function() {
+        debugger;
         return this.$el.remove();
       };
 
@@ -159,7 +157,12 @@
         nodeView = new App.Views.Node({
           model: node
         });
+        nodeView.$el.attr("id", node.id);
         return this.$el.prepend(nodeView.render().el);
+      };
+
+      NodesCollection.prototype.removeOne = function(model, coll, opt) {
+        return $("#" + model.id).detach();
       };
 
       return NodesCollection;
@@ -193,12 +196,12 @@
       return AddNode;
 
     })(Backbone.View);
-    collectionView = new App.Collections.Nodes();
+    collectionNodes = new App.Collections.Nodes();
     addNodeView = new App.Views.AddNode({
-      collection: collectionView
+      collection: collectionNodes
     });
     nodeCollectionView = new App.Views.NodesCollection({
-      collection: collectionView
+      collection: collectionNodes
     });
     return $(".nodes").append(nodeCollectionView.render().el);
   })();
