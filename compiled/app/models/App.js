@@ -4,7 +4,7 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   (function() {
-    var addNode, nodeCollection, nodeCollectionView;
+    var addNodeView, collectionView, nodeCollectionView;
     window.App = {
       Models: {},
       Collections: {},
@@ -20,6 +20,8 @@
         return Node.__super__.constructor.apply(this, arguments);
       }
 
+      Node.prototype.firebase = 'https://resplendent-fire-9007.firebaseio.com/mynode';
+
       Node.prototype.validate = function(attrs) {
         if (attrs.text === null) {
           return "Text requires a valid string";
@@ -28,7 +30,7 @@
 
       return Node;
 
-    })(Backbone.Model);
+    })(Backbone.Firebase.Model);
     App.Views.Node = (function(_super) {
       __extends(Node, _super);
 
@@ -86,9 +88,11 @@
 
       Nodes.prototype.model = App.Models.Node;
 
+      Nodes.prototype.firebase = new Firebase('https://resplendent-fire-9007.firebaseio.com/');
+
       return Nodes;
 
-    })(Backbone.Collection);
+    })(Backbone.Firebase.Collection);
     App.Views.NodesCollection = (function(_super) {
       __extends(NodesCollection, _super);
 
@@ -131,18 +135,13 @@
         'submit': 'submit'
       };
 
-      AddNode.prototype.initialize = function() {
-        return console.log(this.el.innerHTML);
-      };
-
       AddNode.prototype.submit = function(e) {
         var node, text, username;
         e.preventDefault();
         text = $(e.currentTarget).find('input[name=text]').val();
-        console.log(text);
         username = $(e.currentTarget).find('input[name=username]').val();
         node = new App.Models.Node({
-          text: text,
+          text: text || "",
           username: username || 'anonymous'
         });
         return this.collection.add(node);
@@ -151,23 +150,12 @@
       return AddNode;
 
     })(Backbone.View);
-    nodeCollection = new App.Collections.Nodes([
-      {
-        username: "Mike T",
-        text: "Hello World"
-      }, {
-        username: "Peter T",
-        text: "What's up?"
-      }, {
-        username: "Jossy",
-        text: "Hey bros"
-      }
-    ]);
-    addNode = new App.Views.AddNode({
-      collection: nodeCollection
+    collectionView = new App.Collections.Nodes();
+    addNodeView = new App.Views.AddNode({
+      collection: collectionView
     });
     nodeCollectionView = new App.Views.NodesCollection({
-      collection: nodeCollection
+      collection: collectionView
     });
     return $(".nodes").append(nodeCollectionView.render().el);
   })();
