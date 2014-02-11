@@ -8,9 +8,13 @@
   window.template = (id) ->
     _.template($("#" + id).html())
 
-  #class App.Models.Node extends Backbone.Model
-  class App.Models.Node extends Backbone.Firebase.Model
-    firebase: 'https://resplendent-fire-9007.firebaseio.com/mynode'
+  class App.Models.Node extends Backbone.Model
+  #class App.Models.Node extends Backbone.Firebase.Model
+    #firebase: 'https://resplendent-fire-9007.firebaseio.com/myNode'
+    defaults: {
+    username: "Mikey Testing T"
+    text: 'Hack Reactor'
+    }
     validate: (attrs) ->
       if attrs.text is null
         "Text requires a valid string"
@@ -33,10 +37,13 @@
       newText = prompt("Edit the text:", @.model.get('text'))
       if newText is null
         return
-      @.model.set('text', newText)
 
-    deleteNode: () ->
-      @.model.destroy()
+      currentNode = @.model
+      currentNode.set({'text': newText})
+
+    deleteNode: (test) ->
+      @.model.destroy( (test) -> 
+        console.log("Here in App.Views.Node: " + test))
 
     remove: () ->
       @.$el.remove()

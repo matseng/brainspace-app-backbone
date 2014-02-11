@@ -20,7 +20,10 @@
         return Node.__super__.constructor.apply(this, arguments);
       }
 
-      Node.prototype.firebase = 'https://resplendent-fire-9007.firebaseio.com/mynode';
+      Node.prototype.defaults = {
+        username: "Mikey Testing T",
+        text: 'Hack Reactor'
+      };
 
       Node.prototype.validate = function(attrs) {
         if (attrs.text === null) {
@@ -30,7 +33,7 @@
 
       return Node;
 
-    })(Backbone.Firebase.Model);
+    })(Backbone.Model);
     App.Views.Node = (function(_super) {
       __extends(Node, _super);
 
@@ -53,16 +56,21 @@
       };
 
       Node.prototype.editNode = function() {
-        var newText;
+        var currentNode, newText;
         newText = prompt("Edit the text:", this.model.get('text'));
         if (newText === null) {
           return;
         }
-        return this.model.set('text', newText);
+        currentNode = this.model;
+        return currentNode.set({
+          'text': newText
+        });
       };
 
-      Node.prototype.deleteNode = function() {
-        return this.model.destroy();
+      Node.prototype.deleteNode = function(test) {
+        return this.model.destroy(function(test) {
+          return console.log("Here in App.Views.Node: " + test);
+        });
       };
 
       Node.prototype.remove = function() {
