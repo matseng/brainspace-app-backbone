@@ -8,8 +8,12 @@
     window.App = {
       Models: {},
       Collections: {},
-      Views: {},
-      selectedNode: null
+      Views: {}
+    };
+    window.selectedNode = {
+      model: null,
+      offsetX: 0,
+      offsetY: 0
     };
     window.Transform = {
       deltaX: 0,
@@ -23,18 +27,18 @@
     $(document.body).mousemove(function(event) {
       var selectedNode;
       event.preventDefault();
-      if (window.App.selectedNode) {
-        selectedNode = window.App.selectedNode;
+      if (window.selectedNode.model) {
+        selectedNode = window.selectedNode.model;
         selectedNode.set({
-          top: event.pageY
+          top: event.pageY - window.selectedNode.offsetY
         });
         return selectedNode.set({
-          left: event.pageX
+          left: event.pageX - window.selectedNode.offsetX
         });
       }
     });
     $(document.body).on("mouseup", function(event) {
-      return window.App.selectedNode = null;
+      return window.selectedNode.model = null;
     });
     checkKey = function(e) {
       e || e.preventDefault();
@@ -115,8 +119,15 @@
       };
 
       Node.prototype.mouseDownSelectNode = function(e) {
+        var offsetX, offsetY;
         e.preventDefault();
-        return window.App.selectedNode = this.model;
+        offsetX = event.pageX - this.model.get('left');
+        offsetY = event.pageY - this.model.get('top');
+        return window.selectedNode = {
+          model: this.model,
+          offsetX: offsetX,
+          offsetY: offsetY
+        };
       };
 
       Node.prototype.editNode = function() {

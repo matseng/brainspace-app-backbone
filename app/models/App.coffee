@@ -3,7 +3,12 @@
     Models: {}
     Collections: {}
     Views: {}
-    selectedNode: null
+    #selectedNode: null
+  }
+  window.selectedNode = {
+    model: null
+    offsetX: 0
+    offsetY: 0
   }
   window.Transform = {
     deltaX: 0
@@ -18,16 +23,17 @@
 
   $(document.body).mousemove( (event) -> 
     event.preventDefault()
-    if(window.App.selectedNode)
-      selectedNode = window.App.selectedNode
+    if(window.selectedNode.model)
+      selectedNode = window.selectedNode.model
       #console.log(selectedNode)
-      selectedNode.set({top: event.pageY})
-      selectedNode.set({left: event.pageX})
+      #deltaX = event.pageX - selectedNode.get('left') 
+      selectedNode.set({top: event.pageY - window.selectedNode.offsetY})
+      selectedNode.set({left: event.pageX - window.selectedNode.offsetX})
   )
 
   $(document.body).on("mouseup", (event) -> 
     #console.log("mouseup... up and away: " + window.App.selectedNode.toJSON());
-    window.App.selectedNode = null;
+    window.selectedNode.model = null;
   )
 
   checkKey = (e) ->
@@ -96,7 +102,13 @@
 
     mouseDownSelectNode: (e) ->
       e.preventDefault()
-      window.App.selectedNode = @.model
+      offsetX = event.pageX - @.model.get('left')
+      offsetY = event.pageY - @.model.get('top')
+      window.selectedNode = {
+        model: @.model
+        offsetX: offsetX
+        offsetY: offsetY
+      }
 
     editNode: () ->
       newText = prompt("Edit the text:", @.model.get('text'))
