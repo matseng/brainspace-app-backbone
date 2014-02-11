@@ -8,7 +8,7 @@
   window.Transform = {
     deltaX: 0
     deltaY: 0
-    zoom: 2
+    zoom: 1.0
   }
 
   vent = _.extend({}, Backbone.Events)
@@ -31,8 +31,10 @@
   )
 
   checkKey = (e) ->
+    e || e.preventDefault()
+    #e = e || window.event
+
     console.log("Event is: " + e.keyCode)
-    e = e || window.event
     if e.keyCode == 38
       window.Transform.deltaY += 10
       vent.trigger('newTransform')
@@ -49,8 +51,16 @@
       window.Transform.deltaX -= 10
       vent.trigger('newTransform')
       console.log("right arrow " + window.Transform.deltaX)
-    #trigger event that the Nodes Collection can listen to
-
+    else if e.keyCode == 73  #in
+      console.log("Event double-check is: " + e.keyCode)
+      window.Transform.zoom *= 2.0
+      vent.trigger('newTransform')
+      console.log(window.Transform.zoom)
+    else if e.keyCode == 79  #out
+      console.log("Event double-check is: " + e.keyCode)
+      window.Transform.zoom *= 0.5
+      vent.trigger('newTransform')
+      console.log(window.Transform.zoom)
 
   document.onkeydown = checkKey
 

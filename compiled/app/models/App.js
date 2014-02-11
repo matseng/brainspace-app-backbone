@@ -14,7 +14,7 @@
     window.Transform = {
       deltaX: 0,
       deltaY: 0,
-      zoom: 2
+      zoom: 1.0
     };
     vent = _.extend({}, Backbone.Events);
     window.template = function(id) {
@@ -37,8 +37,8 @@
       return window.App.selectedNode = null;
     });
     checkKey = function(e) {
+      e || e.preventDefault();
       console.log("Event is: " + e.keyCode);
-      e = e || window.event;
       if (e.keyCode === 38) {
         window.Transform.deltaY += 10;
         vent.trigger('newTransform');
@@ -55,6 +55,16 @@
         window.Transform.deltaX -= 10;
         vent.trigger('newTransform');
         return console.log("right arrow " + window.Transform.deltaX);
+      } else if (e.keyCode === 73) {
+        console.log("Event double-check is: " + e.keyCode);
+        window.Transform.zoom *= 2.0;
+        vent.trigger('newTransform');
+        return console.log(window.Transform.zoom);
+      } else if (e.keyCode === 79) {
+        console.log("Event double-check is: " + e.keyCode);
+        window.Transform.zoom *= 0.5;
+        vent.trigger('newTransform');
+        return console.log(window.Transform.zoom);
       }
     };
     document.onkeydown = checkKey;
