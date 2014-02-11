@@ -4,7 +4,7 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   (function() {
-    var addNodeView, collectionNodes, nodeCollectionView;
+    var addNodeView, checkKey, collectionNodes, nodeCollectionView;
     window.App = {
       Models: {},
       Collections: {},
@@ -30,6 +30,20 @@
     $(document.body).on("mouseup", function(event) {
       return window.App.selectedNode = null;
     });
+    document.onkeydown = checkKey;
+    checkKey = function(e) {
+      console.log("Event is: " + e.keyCode);
+      e = e || window.event;
+      if (e.keyCode === 38) {
+        return console.log("up arrow");
+      } else if (e.keyCode === 40) {
+        return console.log("down arrow");
+      } else if (e.keyCode === 37) {
+        return console.log("left arrow");
+      } else if (e.keyCode === 39) {
+        return console.log("right arrow");
+      }
+    };
     App.Models.Node = (function(_super) {
       __extends(Node, _super);
 

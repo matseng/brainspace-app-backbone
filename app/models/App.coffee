@@ -23,6 +23,22 @@
     window.App.selectedNode = null;
   )
 
+  document.onkeydown = checkKey
+  checkKey = (e) ->
+    console.log("Event is: " + e.keyCode)
+    e = e || window.event
+    if e.keyCode == 38
+      console.log("up arrow")
+    else if e.keyCode == 40
+      console.log("down arrow")
+    else if e.keyCode == 37
+      console.log("left arrow")
+    else if e.keyCode == 39
+      console.log("right arrow")
+
+  
+
+
   class App.Models.Node extends Backbone.Model
   #class App.Models.Node extends Backbone.Firebase.Model
     #firebase: 'https://resplendent-fire-9007.firebaseio.com/myNode'
