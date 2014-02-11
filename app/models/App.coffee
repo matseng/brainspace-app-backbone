@@ -8,6 +8,7 @@
   window.Transform = {
     deltaX: 0
     deltaY: 0
+    zoom: 2
   }
 
   vent = _.extend({}, Backbone.Events)
@@ -109,6 +110,7 @@
       y = @.model.get('top')
       deltaX = window.Transform.deltaX
       deltaY = window.Transform.deltaY
+      zoom = window.Transform.zoom
       position = {
         left: x + deltaX + "px"
         top: y + deltaY + "px"
@@ -119,6 +121,10 @@
 
       @.$el.css('position', 'absolute')
       @.$el.css(position)
+      #@.$el.css('transform': 'matrix(scaleX, rotate, skew, scaleY, transX, transY)')
+      @.$el.css('transform': "scale(#{zoom})")
+      # @.$el.css('transform': 'scale(2)')
+
       @
 
   #class App.Collections.Nodes extends Backbone.Collection

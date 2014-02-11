@@ -13,7 +13,8 @@
     };
     window.Transform = {
       deltaX: 0,
-      deltaY: 0
+      deltaY: 0,
+      zoom: 2
     };
     vent = _.extend({}, Backbone.Events);
     window.template = function(id) {
@@ -130,11 +131,12 @@
       };
 
       Node.prototype.render = function() {
-        var deltaX, deltaY, position, template, x, y;
+        var deltaX, deltaY, position, template, x, y, zoom;
         x = this.model.get("left");
         y = this.model.get('top');
         deltaX = window.Transform.deltaX;
         deltaY = window.Transform.deltaY;
+        zoom = window.Transform.zoom;
         position = {
           left: x + deltaX + "px",
           top: y + deltaY + "px"
@@ -143,6 +145,9 @@
         this.$el.html(template);
         this.$el.css('position', 'absolute');
         this.$el.css(position);
+        this.$el.css({
+          'transform': "scale(" + zoom + ")"
+        });
         return this;
       };
 
