@@ -5,6 +5,12 @@
     Views: {}
     selectedNode: null
   }
+  window.Transform = {
+    deltaX: 0
+    deltaY: 0
+  }
+
+  vent = _.extend({}, Backbone.Events)
 
   window.template = (id) ->
     _.template($("#" + id).html())
@@ -23,21 +29,29 @@
     window.App.selectedNode = null;
   )
 
-  document.onkeydown = checkKey
   checkKey = (e) ->
     console.log("Event is: " + e.keyCode)
     e = e || window.event
     if e.keyCode == 38
-      console.log("up arrow")
+      window.Transform.deltaY += 10
+      vent.trigger('newTransform')
+      console.log("up arrow " + window.Transform.deltaY)
     else if e.keyCode == 40
-      console.log("down arrow")
+      window.Transform.deltaY -= 10
+      vent.trigger('newTransform')
+      console.log("down arrow " + window.Transform.deltaY)
     else if e.keyCode == 37
-      console.log("left arrow")
+      window.Transform.deltaX += 10
+      vent.trigger('newTransform')
+      console.log("left arrow " + window.Transform.deltaX)
     else if e.keyCode == 39
-      console.log("right arrow")
+      window.Transform.deltaX -= 10
+      vent.trigger('newTransform')
+      console.log("right arrow " + window.Transform.deltaX)
+    #trigger event that the Nodes Collection can listen to
 
-  
 
+  document.onkeydown = checkKey
 
   class App.Models.Node extends Backbone.Model
   #class App.Models.Node extends Backbone.Firebase.Model
@@ -61,6 +75,7 @@
       @.model.on('change', @.render, @)
       @.model.on('destroy', @.remove, @)
       #@.model.on('mousedown', @.mouseDownSelectNode, @)
+      vent.on('newTransform', @.render, @)
 
     events: {
       'click .edit': 'editNode'
@@ -92,9 +107,11 @@
     render: () ->
       x = @.model.get("left")
       y = @.model.get('top')
+      deltaX = window.Transform.deltaX
+      deltaY = window.Transform.deltaY
       position = {
-        top: y + "px"
-        left: x + "px"
+        left: x + deltaX + "px"
+        top: y + deltaY + "px"
       }
       
       template = @.template(@.model.toJSON())
@@ -115,10 +132,17 @@
     initialize: () ->
       @.collection.on('add', @.addOne, @)
       @.collection.on('remove', @.removeOne, @)
+      # vent.on('newTransform', @.render, @)
+
+    rerender: () ->
+      @.collection.each( (node) -> 
+        debugger
+        node.render()
+      , @)
 
     render: () ->
       @.collection.each(@.addOne, @)
-      @
+      @  #returns this view
     
     addOne: (node) ->
       #console.log(node.toJSON())

@@ -4,13 +4,18 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   (function() {
-    var addNodeView, checkKey, collectionNodes, nodeCollectionView;
+    var addNodeView, checkKey, collectionNodes, nodeCollectionView, vent;
     window.App = {
       Models: {},
       Collections: {},
       Views: {},
       selectedNode: null
     };
+    window.Transform = {
+      deltaX: 0,
+      deltaY: 0
+    };
+    vent = _.extend({}, Backbone.Events);
     window.template = function(id) {
       return _.template($("#" + id).html());
     };
@@ -30,20 +35,28 @@
     $(document.body).on("mouseup", function(event) {
       return window.App.selectedNode = null;
     });
-    document.onkeydown = checkKey;
     checkKey = function(e) {
       console.log("Event is: " + e.keyCode);
       e = e || window.event;
       if (e.keyCode === 38) {
-        return console.log("up arrow");
+        window.Transform.deltaY += 10;
+        vent.trigger('newTransform');
+        return console.log("up arrow " + window.Transform.deltaY);
       } else if (e.keyCode === 40) {
-        return console.log("down arrow");
+        window.Transform.deltaY -= 10;
+        vent.trigger('newTransform');
+        return console.log("down arrow " + window.Transform.deltaY);
       } else if (e.keyCode === 37) {
-        return console.log("left arrow");
+        window.Transform.deltaX += 10;
+        vent.trigger('newTransform');
+        return console.log("left arrow " + window.Transform.deltaX);
       } else if (e.keyCode === 39) {
-        return console.log("right arrow");
+        window.Transform.deltaX -= 10;
+        vent.trigger('newTransform');
+        return console.log("right arrow " + window.Transform.deltaX);
       }
     };
+    document.onkeydown = checkKey;
     App.Models.Node = (function(_super) {
       __extends(Node, _super);
 
@@ -80,7 +93,8 @@
 
       Node.prototype.initialize = function() {
         this.model.on('change', this.render, this);
-        return this.model.on('destroy', this.remove, this);
+        this.model.on('destroy', this.remove, this);
+        return vent.on('newTransform', this.render, this);
       };
 
       Node.prototype.events = {
@@ -116,12 +130,14 @@
       };
 
       Node.prototype.render = function() {
-        var position, template, x, y;
+        var deltaX, deltaY, position, template, x, y;
         x = this.model.get("left");
         y = this.model.get('top');
+        deltaX = window.Transform.deltaX;
+        deltaY = window.Transform.deltaY;
         position = {
-          top: y + "px",
-          left: x + "px"
+          left: x + deltaX + "px",
+          top: y + deltaY + "px"
         };
         template = this.template(this.model.toJSON());
         this.$el.html(template);
@@ -159,6 +175,13 @@
       NodesCollection.prototype.initialize = function() {
         this.collection.on('add', this.addOne, this);
         return this.collection.on('remove', this.removeOne, this);
+      };
+
+      NodesCollection.prototype.rerender = function() {
+        return this.collection.each(function(node) {
+          debugger;
+          return node.render();
+        }, this);
       };
 
       NodesCollection.prototype.render = function() {
