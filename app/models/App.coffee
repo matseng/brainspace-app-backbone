@@ -59,7 +59,7 @@
     
     addOne: (node) ->
       nodeView = new App.Views.Node({model: node})
-      @.$el.append(nodeView.render().el)
+      @.$el.prepend(nodeView.render().el)
 
   class App.Views.AddNode extends Backbone.View
     el: '#addNote'

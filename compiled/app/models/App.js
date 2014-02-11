@@ -112,7 +112,7 @@
         nodeView = new App.Views.Node({
           model: node
         });
-        return this.$el.append(nodeView.render().el);
+        return this.$el.prepend(nodeView.render().el);
       };
 
       return NodesCollection;
