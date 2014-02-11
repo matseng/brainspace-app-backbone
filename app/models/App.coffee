@@ -14,6 +14,8 @@
     deltaX: 0
     deltaY: 0
     zoom: 1.0
+    centerX: 0
+    centerY: 0
   }
 
   vent = _.extend({}, Backbone.Events)
@@ -38,34 +40,37 @@
 
   checkKey = (e) ->
     e || e.preventDefault()
-    #e = e || window.event
-
+    e = e || window.event
     console.log("Event is: " + e.keyCode)
     if e.keyCode == 38
       window.Transform.deltaY += 10
-      vent.trigger('newTransform')
+      vent.trigger('translate')
       console.log("up arrow " + window.Transform.deltaY)
     else if e.keyCode == 40
       window.Transform.deltaY -= 10
-      vent.trigger('newTransform')
+      vent.trigger('translate')
       console.log("down arrow " + window.Transform.deltaY)
     else if e.keyCode == 37
       window.Transform.deltaX += 10
-      vent.trigger('newTransform')
+      vent.trigger('translate')
       console.log("left arrow " + window.Transform.deltaX)
     else if e.keyCode == 39
       window.Transform.deltaX -= 10
-      vent.trigger('newTransform')
+      vent.trigger('translate')
       console.log("right arrow " + window.Transform.deltaX)
-    else if e.keyCode == 73  #in
-      console.log("Event double-check is: " + e.keyCode)
+    else if e.keyCode == 73  #In
+      window.Transform.centerX = $('body').width() / 2
+      window.Transform.centerY = $('body').height() / 2
+      #console.log("Center (x,y) = (#{centerX}, #{centerY})")
       window.Transform.zoom *= 2.0
-      vent.trigger('newTransform')
+      vent.trigger('zoom')
       console.log(window.Transform.zoom)
-    else if e.keyCode == 79  #out
-      console.log("Event double-check is: " + e.keyCode)
+    else if e.keyCode == 79  #Out
+      window.Transform.centerX = $('body').width() / 2
+      window.Transform.centerY = $('body').height() / 2
+      #console.log("Center (x,y) = (#{centerX}, #{centerY})")
       window.Transform.zoom *= 0.5
-      vent.trigger('newTransform')
+      vent.trigger('zoom')
       console.log(window.Transform.zoom)
 
   document.onkeydown = checkKey
@@ -92,7 +97,8 @@
       @.model.on('change', @.render, @)
       @.model.on('destroy', @.remove, @)
       #@.model.on('mousedown', @.mouseDownSelectNode, @)
-      vent.on('newTransform', @.render, @)
+      vent.on('translate', @.translate, @)
+      vent.on('zoom', @.zoom, @)
 
     events: {
       'click .edit': 'editNode'
@@ -127,26 +133,40 @@
       debugger
       @.$el.remove()
 
-    render: () ->
+    zoom: () ->
+      x = @.model.get("left") + @.$el.width() / 2  #absolute coordinate
+      #x = @.model.get("left")  #absolute coordinate
+      y = @.model.get('top') + @.$el.height() / 2  #absolute coordinate
+      #y = @.model.get('top') #absolute coordinate
+      zoom = window.Transform.zoom
+      distFromCenterX = x - window.Transform.centerX
+      distFromCenterY = y - window.Transform.centerY
+      transX = window.Transform.centerX + (x - window.Transform.centerX) * zoom
+      transY = window.Transform.centerY + (y - window.Transform.centerY) * zoom
+      @.$el.css('transform': "scale(#{zoom})")
+      @.$el.css('left': transX - @.$el.width() / 2)
+      @.$el.css('top': transY - @.$el.height() / 2)
+      
+    translate: () ->
       x = @.model.get("left")
       y = @.model.get('top')
-      deltaX = window.Transform.deltaX
-      deltaY = window.Transform.deltaY
-      zoom = window.Transform.zoom
+      deltaX = window.Transform.deltaX  #input from key left or right
+      deltaY = window.Transform.deltaY  #input form key up or down
       position = {
         left: x + deltaX + "px"
         top: y + deltaY + "px"
       }
-      
-      template = @.template(@.model.toJSON())
-      @.$el.html(template)
-
       @.$el.css('position', 'absolute')
       @.$el.css(position)
-      #@.$el.css('transform': 'matrix(scaleX, rotate, skew, scaleY, transX, transY)')
-      @.$el.css('transform': "scale(#{zoom})")
-      # @.$el.css('transform': 'scale(2)')
 
+    render: () ->
+      x = @.model.get("left")
+      y = @.model.get('top')
+      template = @.template(@.model.toJSON())
+      @.$el.html(template)
+      @.$el.css('position', 'absolute')
+      @.$el.css('left': x)
+      @.$el.css('top': y)
       @
 
   #class App.Collections.Nodes extends Backbone.Collection

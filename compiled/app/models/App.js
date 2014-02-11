@@ -18,7 +18,9 @@
     window.Transform = {
       deltaX: 0,
       deltaY: 0,
-      zoom: 1.0
+      zoom: 1.0,
+      centerX: 0,
+      centerY: 0
     };
     vent = _.extend({}, Backbone.Events);
     window.template = function(id) {
@@ -42,32 +44,35 @@
     });
     checkKey = function(e) {
       e || e.preventDefault();
+      e = e || window.event;
       console.log("Event is: " + e.keyCode);
       if (e.keyCode === 38) {
         window.Transform.deltaY += 10;
-        vent.trigger('newTransform');
+        vent.trigger('translate');
         return console.log("up arrow " + window.Transform.deltaY);
       } else if (e.keyCode === 40) {
         window.Transform.deltaY -= 10;
-        vent.trigger('newTransform');
+        vent.trigger('translate');
         return console.log("down arrow " + window.Transform.deltaY);
       } else if (e.keyCode === 37) {
         window.Transform.deltaX += 10;
-        vent.trigger('newTransform');
+        vent.trigger('translate');
         return console.log("left arrow " + window.Transform.deltaX);
       } else if (e.keyCode === 39) {
         window.Transform.deltaX -= 10;
-        vent.trigger('newTransform');
+        vent.trigger('translate');
         return console.log("right arrow " + window.Transform.deltaX);
       } else if (e.keyCode === 73) {
-        console.log("Event double-check is: " + e.keyCode);
+        window.Transform.centerX = $('body').width() / 2;
+        window.Transform.centerY = $('body').height() / 2;
         window.Transform.zoom *= 2.0;
-        vent.trigger('newTransform');
+        vent.trigger('zoom');
         return console.log(window.Transform.zoom);
       } else if (e.keyCode === 79) {
-        console.log("Event double-check is: " + e.keyCode);
+        window.Transform.centerX = $('body').width() / 2;
+        window.Transform.centerY = $('body').height() / 2;
         window.Transform.zoom *= 0.5;
-        vent.trigger('newTransform');
+        vent.trigger('zoom');
         return console.log(window.Transform.zoom);
       }
     };
@@ -109,7 +114,8 @@
       Node.prototype.initialize = function() {
         this.model.on('change', this.render, this);
         this.model.on('destroy', this.remove, this);
-        return vent.on('newTransform', this.render, this);
+        vent.on('translate', this.translate, this);
+        return vent.on('zoom', this.zoom, this);
       };
 
       Node.prototype.events = {
@@ -151,23 +157,52 @@
         return this.$el.remove();
       };
 
-      Node.prototype.render = function() {
-        var deltaX, deltaY, position, template, x, y, zoom;
+      Node.prototype.zoom = function() {
+        var distFromCenterX, distFromCenterY, transX, transY, x, y, zoom;
+        x = this.model.get("left") + this.$el.width() / 2;
+        y = this.model.get('top') + this.$el.height() / 2;
+        zoom = window.Transform.zoom;
+        distFromCenterX = x - window.Transform.centerX;
+        distFromCenterY = y - window.Transform.centerY;
+        transX = window.Transform.centerX + (x - window.Transform.centerX) * zoom;
+        transY = window.Transform.centerY + (y - window.Transform.centerY) * zoom;
+        this.$el.css({
+          'transform': "scale(" + zoom + ")"
+        });
+        this.$el.css({
+          'left': transX - this.$el.width() / 2
+        });
+        return this.$el.css({
+          'top': transY - this.$el.height() / 2
+        });
+      };
+
+      Node.prototype.translate = function() {
+        var deltaX, deltaY, position, x, y;
         x = this.model.get("left");
         y = this.model.get('top');
         deltaX = window.Transform.deltaX;
         deltaY = window.Transform.deltaY;
-        zoom = window.Transform.zoom;
         position = {
           left: x + deltaX + "px",
           top: y + deltaY + "px"
         };
+        this.$el.css('position', 'absolute');
+        return this.$el.css(position);
+      };
+
+      Node.prototype.render = function() {
+        var template, x, y;
+        x = this.model.get("left");
+        y = this.model.get('top');
         template = this.template(this.model.toJSON());
         this.$el.html(template);
         this.$el.css('position', 'absolute');
-        this.$el.css(position);
         this.$el.css({
-          'transform': "scale(" + zoom + ")"
+          'left': x
+        });
+        this.$el.css({
+          'top': y
         });
         return this;
       };
