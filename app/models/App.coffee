@@ -27,9 +27,6 @@
     event.preventDefault()
     if(window.selectedNode.model)
       selectedNode = window.selectedNode.model
-      #console.log(selectedNode)
-      #deltaX = event.pageX - selectedNode.get('left') 
-      #debugger
       selectedNode.set({top: event.pageY - window.selectedNode.offsetY})
       selectedNode.set({left: event.pageX - window.selectedNode.offsetX})
   )
@@ -44,19 +41,19 @@
     e = e || window.event
     console.log("Event is: " + e.keyCode)
     if e.keyCode == 38
-      window.Transform.deltaY += 10
+      window.Transform.deltaY += 10 * window.Transform.zoom
       vent.trigger('translate')
       console.log("up arrow " + window.Transform.deltaY)
     else if e.keyCode == 40
-      window.Transform.deltaY -= 10
+      window.Transform.deltaY -= 10 * window.Transform.zoom
       vent.trigger('translate')
       console.log("down arrow " + window.Transform.deltaY)
     else if e.keyCode == 37
-      window.Transform.deltaX += 10
+      window.Transform.deltaX += 10 * window.Transform.zoom
       vent.trigger('translate')
       console.log("left arrow " + window.Transform.deltaX)
     else if e.keyCode == 39
-      window.Transform.deltaX -= 10
+      window.Transform.deltaX -= 10 * window.Transform.zoom
       vent.trigger('translate')
       console.log("right arrow " + window.Transform.deltaX)
     else if e.keyCode == 73  #In
@@ -110,10 +107,11 @@
     }
 
     mouseenter: () ->
-      @.$el.find('.nodeMenu').fadeIn('fast')
+      #@.$el.find('.nodeMenu').fadeIn('fast')
+      @.$el.find('.nodeMenu').css('visibility', 'visible')
 
     mouseleave: () ->
-      @.$el.find('.nodeMenu').fadeOut('fast')
+      @.$el.find('.nodeMenu').css('visibility', 'hidden')
 
     mouseDownSelectNode: (e) ->
       e.preventDefault()
@@ -148,9 +146,9 @@
       @.$el.remove()
 
     zoom: () ->
-      x = @.model.get("left") + @.$el.width() / 2  #absolute coordinate
+      x = @.model.get("left") + @.$el.width() / 2 + window.Transform.deltaX #absolute coordinate
       #x = @.model.get("left")  #absolute coordinate
-      y = @.model.get('top') + @.$el.height() / 2  #absolute coordinate
+      y = @.model.get('top') + @.$el.height() / 2 + window.Transform.deltaY #absolute coordinate
       #y = @.model.get('top') #absolute coordinate
       zoom = window.Transform.zoom
       distFromCenterX = x - window.Transform.centerX
@@ -162,29 +160,49 @@
       @.$el.css('top': transY - @.$el.height() / 2)
       
     translate: () ->
+      x = @.model.get("left") + @.$el.width() / 2 + window.Transform.deltaX #absolute coordinate
+      #x = @.model.get("left")  #absolute coordinate
+      y = @.model.get('top') + @.$el.height() / 2 + window.Transform.deltaY #absolute coordinate
+      #y = @.model.get('top') #absolute coordinate
+      zoom = window.Transform.zoom
+      distFromCenterX = x - window.Transform.centerX
+      distFromCenterY = y - window.Transform.centerY
+      transX = window.Transform.centerX + (x - window.Transform.centerX) * zoom
+      transY = window.Transform.centerY + (y - window.Transform.centerY) * zoom
+      @.$el.css('transform': "scale(#{zoom})")
+      @.$el.css('left': transX - @.$el.width() / 2)
+      @.$el.css('top': transY - @.$el.height() / 2)
+
+    translate2: () ->
+      #debugger
       x = @.model.get("left")
       y = @.model.get('top')
+      # x = @.$el.position().left
+      # y = @.$el.position().top
+      zoom = window.Transform.zoom
       deltaX = window.Transform.deltaX  #input from key left or right
       deltaY = window.Transform.deltaY  #input form key up or down
       position = {
-        left: x + deltaX + "px"
-        top: y + deltaY + "px"
+        left: (x + deltaX) * zoom + "px"
+        top: (y + deltaY) * zoom + "px"
       }
       @.$el.css('position', 'absolute')
       @.$el.css(position)
+      @
 
-    update: () ->      
+    update: () ->
       #template = @.template(@.model.toJSON())
       #@.$el.html(template)
       #@.$el.css('position', 'absolute')
       if(@.model.changedAttributes().text)
         template = @.template(@.model.toJSON())
         @.$el.html(template)
-      x = @.model.get("left")
-      y = @.model.get('top')
-      @.$el.css('left', x)
-      @.$el.css('top', y)
-      @
+      else
+        x = @.model.get("left")
+        y = @.model.get('top')
+        @.$el.css('left', x)
+        @.$el.css('top', y)
+        @
 
     render: () ->
       
@@ -251,7 +269,7 @@
         username: username || 'anonymous'
       })
       @.collection.add(node)
-      vent.trigger('zoom')
+      #vent.trigger('zoom')
 
   # nodeCollection = new App.Collections.Nodes([
   #   {

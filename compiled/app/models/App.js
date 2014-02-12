@@ -47,19 +47,19 @@
       e = e || window.event;
       console.log("Event is: " + e.keyCode);
       if (e.keyCode === 38) {
-        window.Transform.deltaY += 10;
+        window.Transform.deltaY += 10 * window.Transform.zoom;
         vent.trigger('translate');
         return console.log("up arrow " + window.Transform.deltaY);
       } else if (e.keyCode === 40) {
-        window.Transform.deltaY -= 10;
+        window.Transform.deltaY -= 10 * window.Transform.zoom;
         vent.trigger('translate');
         return console.log("down arrow " + window.Transform.deltaY);
       } else if (e.keyCode === 37) {
-        window.Transform.deltaX += 10;
+        window.Transform.deltaX += 10 * window.Transform.zoom;
         vent.trigger('translate');
         return console.log("left arrow " + window.Transform.deltaX);
       } else if (e.keyCode === 39) {
-        window.Transform.deltaX -= 10;
+        window.Transform.deltaX -= 10 * window.Transform.zoom;
         vent.trigger('translate');
         return console.log("right arrow " + window.Transform.deltaX);
       } else if (e.keyCode === 73) {
@@ -127,11 +127,11 @@
       };
 
       Node.prototype.mouseenter = function() {
-        return this.$el.find('.nodeMenu').fadeIn('fast');
+        return this.$el.find('.nodeMenu').css('visibility', 'visible');
       };
 
       Node.prototype.mouseleave = function() {
-        return this.$el.find('.nodeMenu').fadeOut('fast');
+        return this.$el.find('.nodeMenu').css('visibility', 'hidden');
       };
 
       Node.prototype.mouseDownSelectNode = function(e) {
@@ -170,8 +170,8 @@
 
       Node.prototype.zoom = function() {
         var distFromCenterX, distFromCenterY, transX, transY, x, y, zoom;
-        x = this.model.get("left") + this.$el.width() / 2;
-        y = this.model.get('top') + this.$el.height() / 2;
+        x = this.model.get("left") + this.$el.width() / 2 + window.Transform.deltaX;
+        y = this.model.get('top') + this.$el.height() / 2 + window.Transform.deltaY;
         zoom = window.Transform.zoom;
         distFromCenterX = x - window.Transform.centerX;
         distFromCenterY = y - window.Transform.centerY;
@@ -189,30 +189,53 @@
       };
 
       Node.prototype.translate = function() {
-        var deltaX, deltaY, position, x, y;
+        var distFromCenterX, distFromCenterY, transX, transY, x, y, zoom;
+        x = this.model.get("left") + this.$el.width() / 2 + window.Transform.deltaX;
+        y = this.model.get('top') + this.$el.height() / 2 + window.Transform.deltaY;
+        zoom = window.Transform.zoom;
+        distFromCenterX = x - window.Transform.centerX;
+        distFromCenterY = y - window.Transform.centerY;
+        transX = window.Transform.centerX + (x - window.Transform.centerX) * zoom;
+        transY = window.Transform.centerY + (y - window.Transform.centerY) * zoom;
+        this.$el.css({
+          'transform': "scale(" + zoom + ")"
+        });
+        this.$el.css({
+          'left': transX - this.$el.width() / 2
+        });
+        return this.$el.css({
+          'top': transY - this.$el.height() / 2
+        });
+      };
+
+      Node.prototype.translate2 = function() {
+        var deltaX, deltaY, position, x, y, zoom;
         x = this.model.get("left");
         y = this.model.get('top');
+        zoom = window.Transform.zoom;
         deltaX = window.Transform.deltaX;
         deltaY = window.Transform.deltaY;
         position = {
-          left: x + deltaX + "px",
-          top: y + deltaY + "px"
+          left: (x + deltaX) * zoom + "px",
+          top: (y + deltaY) * zoom + "px"
         };
         this.$el.css('position', 'absolute');
-        return this.$el.css(position);
+        this.$el.css(position);
+        return this;
       };
 
       Node.prototype.update = function() {
         var template, x, y;
         if ((this.model.changedAttributes().text)) {
           template = this.template(this.model.toJSON());
-          this.$el.html(template);
+          return this.$el.html(template);
+        } else {
+          x = this.model.get("left");
+          y = this.model.get('top');
+          this.$el.css('left', x);
+          this.$el.css('top', y);
+          return this;
         }
-        x = this.model.get("left");
-        y = this.model.get('top');
-        this.$el.css('left', x);
-        this.$el.css('top', y);
-        return this;
       };
 
       Node.prototype.render = function() {
@@ -307,8 +330,7 @@
           text: text || "empty",
           username: username || 'anonymous'
         });
-        this.collection.add(node);
-        return vent.trigger('zoom');
+        return this.collection.add(node);
       };
 
       return AddNode;
