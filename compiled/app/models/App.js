@@ -125,14 +125,16 @@
       };
 
       Node.prototype.mouseDownSelectNode = function(e) {
-        var offsetX, offsetY;
+        var nodePositionX, nodePositionY, offsetX, offsetY;
         e.preventDefault();
-        offsetX = event.pageX - this.model.get('left');
-        offsetY = event.pageY - this.model.get('top');
+        nodePositionX = parseInt(this.$el.css('left')) || this.$el.position().left;
+        nodePositionY = parseInt(this.$el.css('top')) || this.$el.position().top;
+        offsetX = event.pageX - nodePositionX;
+        offsetY = event.pageY - nodePositionY;
         return window.selectedNode = {
           model: this.model,
-          offsetX: offsetX,
-          offsetY: offsetY
+          offsetX: parseInt(offsetX),
+          offsetY: parseInt(offsetY)
         };
       };
 
@@ -153,7 +155,6 @@
       };
 
       Node.prototype.remove = function() {
-        debugger;
         return this.$el.remove();
       };
 
@@ -193,17 +194,13 @@
 
       Node.prototype.render = function() {
         var template, x, y;
-        x = this.model.get("left");
-        y = this.model.get('top');
         template = this.template(this.model.toJSON());
         this.$el.html(template);
         this.$el.css('position', 'absolute');
-        this.$el.css({
-          'left': x
-        });
-        this.$el.css({
-          'top': y
-        });
+        x = this.model.get("left");
+        y = this.model.get('top');
+        this.$el.css('left', x);
+        this.$el.css('top', y);
         return this;
       };
 
@@ -240,7 +237,6 @@
 
       NodesCollection.prototype.rerender = function() {
         return this.collection.each(function(node) {
-          debugger;
           return node.render();
         }, this);
       };

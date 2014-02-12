@@ -29,6 +29,7 @@
       selectedNode = window.selectedNode.model
       #console.log(selectedNode)
       #deltaX = event.pageX - selectedNode.get('left') 
+      #debugger
       selectedNode.set({top: event.pageY - window.selectedNode.offsetY})
       selectedNode.set({left: event.pageX - window.selectedNode.offsetX})
   )
@@ -108,13 +109,19 @@
 
     mouseDownSelectNode: (e) ->
       e.preventDefault()
-      offsetX = event.pageX - @.model.get('left')
-      offsetY = event.pageY - @.model.get('top')
+      #offsetX = event.pageX - @.model.get('left')
+      nodePositionX = parseInt(@.$el.css('left')) || @.$el.position().left
+      nodePositionY = parseInt(@.$el.css('top')) || @.$el.position().top
+      
+      offsetX = event.pageX - nodePositionX
+      offsetY = event.pageY - nodePositionY
+      #debugger
       window.selectedNode = {
         model: @.model
-        offsetX: offsetX
-        offsetY: offsetY
+        offsetX: parseInt(offsetX)
+        offsetY: parseInt(offsetY)
       }
+      #debugger
 
     editNode: () ->
       newText = prompt("Edit the text:", @.model.get('text'))
@@ -130,7 +137,6 @@
       @.model.collection.remove(@.model)  #destroy method is not working well with firebase
 
     remove: () ->
-      debugger
       @.$el.remove()
 
     zoom: () ->
@@ -160,13 +166,14 @@
       @.$el.css(position)
 
     render: () ->
-      x = @.model.get("left")
-      y = @.model.get('top')
+      
       template = @.template(@.model.toJSON())
       @.$el.html(template)
       @.$el.css('position', 'absolute')
-      @.$el.css('left': x)
-      @.$el.css('top': y)
+      x = @.model.get("left")
+      y = @.model.get('top')
+      @.$el.css('left', x)
+      @.$el.css('top', y)
       @
 
   #class App.Collections.Nodes extends Backbone.Collection
@@ -184,7 +191,7 @@
 
     rerender: () ->
       @.collection.each( (node) -> 
-        debugger
+        #debugger
         node.render()
       , @)
 
