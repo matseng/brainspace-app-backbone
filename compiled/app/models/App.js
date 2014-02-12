@@ -65,13 +65,13 @@
       } else if (e.keyCode === 73) {
         window.Transform.centerX = $('body').width() / 2;
         window.Transform.centerY = $('body').height() / 2;
-        window.Transform.zoom *= 2.0;
+        window.Transform.zoom *= 1.5;
         vent.trigger('zoom');
         return console.log(window.Transform.zoom);
       } else if (e.keyCode === 79) {
         window.Transform.centerX = $('body').width() / 2;
         window.Transform.centerY = $('body').height() / 2;
-        window.Transform.zoom *= 0.5;
+        window.Transform.zoom *= 0.67;
         vent.trigger('zoom');
         return console.log(window.Transform.zoom);
       }
@@ -112,7 +112,7 @@
       Node.prototype.template = template('nodeTemplate');
 
       Node.prototype.initialize = function() {
-        this.model.on('change', this.render, this);
+        this.model.on('change', this.update, this);
         this.model.on('destroy', this.remove, this);
         vent.on('translate', this.translate, this);
         return vent.on('zoom', this.zoom, this);
@@ -121,7 +121,17 @@
       Node.prototype.events = {
         'click .edit': 'editNode',
         'click .delete': 'deleteNode',
-        'mousedown span': 'mouseDownSelectNode'
+        'mousedown span': 'mouseDownSelectNode',
+        'mouseenter': 'mouseenter',
+        'mouseleave': 'mouseleave'
+      };
+
+      Node.prototype.mouseenter = function() {
+        return this.$el.find('.nodeMenu').fadeIn('fast');
+      };
+
+      Node.prototype.mouseleave = function() {
+        return this.$el.find('.nodeMenu').fadeOut('fast');
       };
 
       Node.prototype.mouseDownSelectNode = function(e) {
@@ -190,6 +200,19 @@
         };
         this.$el.css('position', 'absolute');
         return this.$el.css(position);
+      };
+
+      Node.prototype.update = function() {
+        var template, x, y;
+        if ((this.model.changedAttributes().text)) {
+          template = this.template(this.model.toJSON());
+          this.$el.html(template);
+        }
+        x = this.model.get("left");
+        y = this.model.get('top');
+        this.$el.css('left', x);
+        this.$el.css('top', y);
+        return this;
       };
 
       Node.prototype.render = function() {
@@ -284,7 +307,8 @@
           text: text || "empty",
           username: username || 'anonymous'
         });
-        return this.collection.add(node);
+        this.collection.add(node);
+        return vent.trigger('zoom');
       };
 
       return AddNode;

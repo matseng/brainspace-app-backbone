@@ -63,14 +63,14 @@
       window.Transform.centerX = $('body').width() / 2
       window.Transform.centerY = $('body').height() / 2
       #console.log("Center (x,y) = (#{centerX}, #{centerY})")
-      window.Transform.zoom *= 2.0
+      window.Transform.zoom *= 1.5
       vent.trigger('zoom')
       console.log(window.Transform.zoom)
     else if e.keyCode == 79  #Out
       window.Transform.centerX = $('body').width() / 2
       window.Transform.centerY = $('body').height() / 2
       #console.log("Center (x,y) = (#{centerX}, #{centerY})")
-      window.Transform.zoom *= 0.5
+      window.Transform.zoom *= 0.67
       vent.trigger('zoom')
       console.log(window.Transform.zoom)
 
@@ -95,7 +95,7 @@
     template: template('nodeTemplate')
 
     initialize: () ->
-      @.model.on('change', @.render, @)
+      @.model.on('change', @.update, @)
       @.model.on('destroy', @.remove, @)
       #@.model.on('mousedown', @.mouseDownSelectNode, @)
       vent.on('translate', @.translate, @)
@@ -105,7 +105,15 @@
       'click .edit': 'editNode'
       'click .delete': 'deleteNode'
       'mousedown span': 'mouseDownSelectNode'
+      'mouseenter': 'mouseenter'
+      'mouseleave': 'mouseleave'
     }
+
+    mouseenter: () ->
+      @.$el.find('.nodeMenu').fadeIn('fast')
+
+    mouseleave: () ->
+      @.$el.find('.nodeMenu').fadeOut('fast')
 
     mouseDownSelectNode: (e) ->
       e.preventDefault()
@@ -164,6 +172,19 @@
       }
       @.$el.css('position', 'absolute')
       @.$el.css(position)
+
+    update: () ->      
+      #template = @.template(@.model.toJSON())
+      #@.$el.html(template)
+      #@.$el.css('position', 'absolute')
+      if(@.model.changedAttributes().text)
+        template = @.template(@.model.toJSON())
+        @.$el.html(template)
+      x = @.model.get("left")
+      y = @.model.get('top')
+      @.$el.css('left', x)
+      @.$el.css('top', y)
+      @
 
     render: () ->
       
@@ -230,6 +251,7 @@
         username: username || 'anonymous'
       })
       @.collection.add(node)
+      vent.trigger('zoom')
 
   # nodeCollection = new App.Collections.Nodes([
   #   {
