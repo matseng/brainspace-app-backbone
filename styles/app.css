@@ -1,3 +1,13 @@
+body, html { 
+  overflow-x: hidden; 
+  overflow-y: hidden; 
+}
+
+li{
+  white-space: nowrap;
+}
+
 .nodeMenu {
-  visibility: hidden
+  visibility: hidden;
+  white-space: nowrap;
 }

@@ -46,34 +46,40 @@
       e || e.preventDefault();
       e = e || window.event;
       console.log("Event is: " + e.keyCode);
-      if (e.keyCode === 38) {
-        window.Transform.deltaY += 10 * window.Transform.zoom;
-        vent.trigger('translate');
-        return console.log("up arrow " + window.Transform.deltaY);
-      } else if (e.keyCode === 40) {
-        window.Transform.deltaY -= 10 * window.Transform.zoom;
-        vent.trigger('translate');
-        return console.log("down arrow " + window.Transform.deltaY);
-      } else if (e.keyCode === 37) {
-        window.Transform.deltaX += 10 * window.Transform.zoom;
-        vent.trigger('translate');
-        return console.log("left arrow " + window.Transform.deltaX);
-      } else if (e.keyCode === 39) {
-        window.Transform.deltaX -= 10 * window.Transform.zoom;
-        vent.trigger('translate');
-        return console.log("right arrow " + window.Transform.deltaX);
-      } else if (e.keyCode === 73) {
-        window.Transform.centerX = $('body').width() / 2;
-        window.Transform.centerY = $('body').height() / 2;
-        window.Transform.zoom *= 1.5;
-        vent.trigger('zoom');
-        return console.log(window.Transform.zoom);
-      } else if (e.keyCode === 79) {
-        window.Transform.centerX = $('body').width() / 2;
-        window.Transform.centerY = $('body').height() / 2;
-        window.Transform.zoom *= 0.67;
-        vent.trigger('zoom');
-        return console.log(window.Transform.zoom);
+      console.log("Active element is: " + document.activeElement.tagName);
+      if (document.activeElement.tagName !== "INPUT") {
+        if (e.keyCode === 38) {
+          window.Transform.deltaY += 10 * window.Transform.zoom;
+          vent.trigger('translate');
+          return console.log("up arrow " + window.Transform.deltaY);
+        } else if (e.keyCode === 40) {
+          window.Transform.deltaY -= 10 * window.Transform.zoom;
+          vent.trigger('translate');
+          return console.log("down arrow " + window.Transform.deltaY);
+        } else if (e.keyCode === 37) {
+          window.Transform.deltaX += 10 * window.Transform.zoom;
+          vent.trigger('translate');
+          return console.log("left arrow " + window.Transform.deltaX);
+        } else if (e.keyCode === 39) {
+          console.log("Repeat: Active element is: " + document.activeElement.tagName);
+          window.Transform.deltaX -= 1 * window.Transform.zoom;
+          vent.trigger('translate');
+          return console.log("right arrow " + window.Transform.deltaX);
+        } else if (e.keyCode === 73) {
+          window.Transform.centerX = $('body').width() / 2;
+          window.Transform.centerY = $('body').height() / 2;
+          window.Transform.zoom *= 1.5;
+          vent.trigger('zoom');
+          return console.log(window.Transform.zoom);
+        } else if (e.keyCode === 79) {
+          window.Transform.centerX = $('body').width() / 2;
+          window.Transform.centerY = $('body').height() / 2;
+          window.Transform.zoom *= 0.67;
+          vent.trigger('zoom');
+          return console.log(window.Transform.zoom);
+        }
+      } else {
+
       }
     };
     document.onkeydown = checkKey;
