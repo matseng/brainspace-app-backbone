@@ -23,23 +23,39 @@
       centerY: 0
     };
     window.mouse = {
-      prevX: 0,
-      prevY: 0
+      down: false,
+      x: 0,
+      y: 0
     };
     vent = _.extend({}, Backbone.Events);
     window.template = function(id) {
       return _.template($("#" + id).html());
     };
     $(document.body).mousemove(function(event) {
-      var selectedNodeView;
+      var panX, panY, selectedNodeView;
       event.preventDefault();
       if (window.selectedNode.modelView) {
         selectedNodeView = window.selectedNode.modelView;
         return selectedNodeView.setAbsCoordinates(event.pageX - window.selectedNode.offsetX, event.pageY - window.selectedNode.offsetY);
+      } else if (window.mouse.down) {
+        panX = window.mouse.x - event.pageX;
+        panY = window.mouse.y - event.pageY;
+        window.Transform.deltaX = -panX;
+        window.Transform.deltaY = -panY;
+        return vent.trigger('pan');
       }
     });
     $(document.body).on("mouseup", function(event) {
-      return window.selectedNode.modelView = null;
+      window.selectedNode.modelView = null;
+      return window.mouse.down = false;
+    });
+    $(document.body).on("mousedown", function(e) {
+      if (!window.selectedNode.modelView) {
+        window.mouse.down = true;
+        window.mouse.x = e.pageX;
+        window.mouse.y = e.pageY;
+        return console.log("No node is currently selected: mouse is " + window.mouse.x + ", " + window.mouse.y);
+      }
     });
     checkKey = function(e) {
       e || e.preventDefault();
@@ -48,19 +64,19 @@
       console.log("Active element is: " + document.activeElement.tagName);
       if (document.activeElement.parentNode.tagName !== "FORM") {
         if (e.keyCode === 38) {
-          window.Transform.deltaY += 10 * window.Transform.zoom * window.Transform.zoom;
+          window.Transform.deltaY += 10 * 1 / window.Transform.zoom;
           vent.trigger('pan');
           return console.log("up arrow " + window.Transform.deltaY);
         } else if (e.keyCode === 40) {
-          window.Transform.deltaY -= 10 * window.Transform.zoom * window.Transform.zoom;
+          window.Transform.deltaY -= 10 * 1 / window.Transform.zoom;
           vent.trigger('pan');
           return console.log("down arrow " + window.Transform.deltaY);
         } else if (e.keyCode === 37) {
-          window.Transform.deltaX += 10 * window.Transform.zoom * window.Transform.zoom;
+          window.Transform.deltaX += 10 * 1 / window.Transform.zoom;
           vent.trigger('pan');
           return console.log("left arrow " + window.Transform.deltaX);
         } else if (e.keyCode === 39) {
-          window.Transform.deltaX -= 10 * window.Transform.zoom * window.Transform.zoom;
+          window.Transform.deltaX -= 10 * 1 / window.Transform.zoom;
           vent.trigger('pan');
           return console.log("right arrow " + window.Transform.deltaX);
         } else if (e.keyCode === 73) {

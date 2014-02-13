@@ -18,8 +18,9 @@
     centerY: 0
   }
   window.mouse = {
-    prevX: 0
-    prevY: 0
+    down: false
+    x: 0
+    y: 0
   }
 
   vent = _.extend({}, Backbone.Events)
@@ -35,16 +36,30 @@
       #selectedNode.set({top: event.pageY - window.selectedNode.offsetY})  #need to change this statement to abs coordinates
       #selectedNode.set({left: event.pageX - window.selectedNode.offsetX})  #need to change this statement to abs coordinates
       selectedNodeView.setAbsCoordinates(event.pageX - window.selectedNode.offsetX, event.pageY - window.selectedNode.offsetY)
+    else if window.mouse.down
+      panX = window.mouse.x - event.pageX
+      panY = window.mouse.y - event.pageY
+      window.Transform.deltaX =  - panX
+      window.Transform.deltaY = - panY
+      vent.trigger('pan')
   )
 
   $(document.body).on("mouseup", (event) -> 
     window.selectedNode.modelView = null
+    window.mouse.down = false
   )
 
   #drag to pan screen (2 helpers)
 
   #1 of 2: check if a node is NOT selected
   #mousedown for current xy
+  $(document.body).on("mousedown", (e) ->
+    if !window.selectedNode.modelView
+      window.mouse.down = true
+      window.mouse.x = e.pageX
+      window.mouse.y = e.pageY
+      console.log("No node is currently selected: mouse is #{window.mouse.x}, #{window.mouse.y}")
+  )
 
   #check if a node is NOT selected
   #mousemove for current xy --> delta xy
@@ -59,19 +74,19 @@
     console.log("Active element is: " + document.activeElement.tagName)
     if document.activeElement.parentNode.tagName != "FORM"
       if e.keyCode == 38
-        window.Transform.deltaY += 10 * window.Transform.zoom * window.Transform.zoom
+        window.Transform.deltaY += 10 * 1 / window.Transform.zoom
         vent.trigger('pan')
         console.log("up arrow " + window.Transform.deltaY)
       else if e.keyCode == 40
-        window.Transform.deltaY -= 10 * window.Transform.zoom * window.Transform.zoom
+        window.Transform.deltaY -= 10 * 1 / window.Transform.zoom
         vent.trigger('pan')
         console.log("down arrow " + window.Transform.deltaY)
       else if e.keyCode == 37
-        window.Transform.deltaX += 10 * window.Transform.zoom * window.Transform.zoom
+        window.Transform.deltaX += 10 * 1/ window.Transform.zoom
         vent.trigger('pan')
         console.log("left arrow " + window.Transform.deltaX)
       else if e.keyCode == 39
-        window.Transform.deltaX -= 10 * window.Transform.zoom * window.Transform.zoom
+        window.Transform.deltaX -= 10 * 1 / window.Transform.zoom
         vent.trigger('pan')
         console.log("right arrow " + window.Transform.deltaX)
       else if e.keyCode == 73  #In
