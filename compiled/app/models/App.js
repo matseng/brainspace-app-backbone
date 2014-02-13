@@ -138,14 +138,14 @@
       Node.prototype.mouseDownSelectNode = function(e) {
         var nodePositionX, nodePositionY, offsetX, offsetY;
         e.preventDefault();
-        nodePositionX = parseInt(this.$el.css('left')) || this.$el.position().left;
-        nodePositionY = parseInt(this.$el.css('top')) || this.$el.position().top;
+        nodePositionX = this.$el.position().left;
+        nodePositionY = this.$el.position().top;
         offsetX = event.pageX - nodePositionX;
         offsetY = event.pageY - nodePositionY;
         return window.selectedNode = {
           modelView: this,
-          offsetX: parseInt(offsetX),
-          offsetY: parseInt(offsetY)
+          offsetX: offsetX,
+          offsetY: offsetY
         };
       };
 
@@ -196,9 +196,6 @@
         distFromCenterY = y - window.Transform.centerY;
         transX = window.Transform.centerX + (x - window.Transform.centerX) * 1 / zoom;
         transY = window.Transform.centerY + (y - window.Transform.centerY) * 1 / zoom;
-        console.log({
-          "left": transX - window.Transform.deltaX
-        });
         this.model.set({
           "left": transX - window.Transform.deltaX
         });

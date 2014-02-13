@@ -116,14 +116,14 @@
 
     mouseDownSelectNode: (e) ->
       e.preventDefault()
-      nodePositionX = parseInt(@.$el.css('left')) || @.$el.position().left
-      nodePositionY = parseInt(@.$el.css('top')) || @.$el.position().top
+      nodePositionX = @.$el.position().left #parseInt(@.$el.css('left')) || 
+      nodePositionY = @.$el.position().top #parseInt(@.$el.css('top')) || 
       offsetX = event.pageX - nodePositionX
       offsetY = event.pageY - nodePositionY
       window.selectedNode = {
         modelView: @
-        offsetX: parseInt(offsetX)
-        offsetY: parseInt(offsetY)
+        offsetX: offsetX  #parseInt(offsetX)
+        offsetY: offsetY  #parseInt(offsetY)
       }
 
     editNode: () ->
@@ -162,8 +162,6 @@
       distFromCenterY = y - window.Transform.centerY
       transX = window.Transform.centerX + (x - window.Transform.centerX) * 1 / zoom
       transY = window.Transform.centerY + (y - window.Transform.centerY) * 1 / zoom
-      console.log({"left": transX - window.Transform.deltaX})
-      #debugger
       @.model.set({"left": transX - window.Transform.deltaX})
       @.model.set({"top": transY - window.Transform.deltaY})
 
