@@ -6,7 +6,7 @@
     #selectedNode: null
   }
   window.selectedNode = {
-    model: null
+    modelView: null
     offsetX: 0
     offsetY: 0
   }
@@ -25,15 +25,16 @@
 
   $(document.body).mousemove( (event) -> 
     event.preventDefault()
-    if(window.selectedNode.model)
-      selectedNode = window.selectedNode.model
-      selectedNode.set({top: event.pageY - window.selectedNode.offsetY})  #need to change this statement to abs coordinates
-      selectedNode.set({left: event.pageX - window.selectedNode.offsetX})  #need to change this statement to abs coordinates
+    #console.log("Is modelView null: " + window.selectedNode.modelView)
+    if(window.selectedNode.modelView)
+      selectedNodeView = window.selectedNode.modelView
+      #selectedNode.set({top: event.pageY - window.selectedNode.offsetY})  #need to change this statement to abs coordinates
+      #selectedNode.set({left: event.pageX - window.selectedNode.offsetX})  #need to change this statement to abs coordinates
+      selectedNodeView.setAbsCoordinates(event.pageX - window.selectedNode.offsetX, event.pageY - window.selectedNode.offsetY)
   )
 
   $(document.body).on("mouseup", (event) -> 
-    #console.log("mouseup... up and away: " + window.App.selectedNode.toJSON());
-    window.selectedNode.model = null;
+    window.selectedNode.modelView = null
   )
 
   checkKey = (e) ->
@@ -56,7 +57,7 @@
         console.log("left arrow " + window.Transform.deltaX)
       else if e.keyCode == 39
         console.log("Repeat: Active element is: " + document.activeElement.tagName)
-        window.Transform.deltaX -= 1 * window.Transform.zoom
+        window.Transform.deltaX -= 10 * window.Transform.zoom
         vent.trigger('translate')
         console.log("right arrow " + window.Transform.deltaX)
       else if e.keyCode == 73  #In
@@ -78,8 +79,6 @@
   document.onkeydown = checkKey
 
   class App.Models.Node extends Backbone.Model
-  #class App.Models.Node extends Backbone.Firebase.Model
-    #firebase: 'https://resplendent-fire-9007.firebaseio.com/myNode'
     defaults: {
     username: "Mikey Testing T"
     text: 'Hack Reactor'
@@ -98,8 +97,7 @@
     initialize: () ->
       @.model.on('change', @.update, @)
       @.model.on('destroy', @.remove, @)
-      #@.model.on('mousedown', @.mouseDownSelectNode, @)
-      vent.on('translate', @.translate, @)
+      vent.on('translate', @.zoom, @)
       vent.on('zoom', @.zoom, @)
 
     events: {
@@ -111,7 +109,6 @@
     }
 
     mouseenter: () ->
-      #@.$el.find('.nodeMenu').fadeIn('fast')
       @.$el.find('.nodeMenu').css('visibility', 'visible')
 
     mouseleave: () ->
@@ -119,19 +116,15 @@
 
     mouseDownSelectNode: (e) ->
       e.preventDefault()
-      #offsetX = event.pageX - @.model.get('left')
       nodePositionX = parseInt(@.$el.css('left')) || @.$el.position().left
       nodePositionY = parseInt(@.$el.css('top')) || @.$el.position().top
-      
       offsetX = event.pageX - nodePositionX
       offsetY = event.pageY - nodePositionY
-      #debugger
       window.selectedNode = {
-        model: @.model
+        modelView: @
         offsetX: parseInt(offsetX)
         offsetY: parseInt(offsetY)
       }
-      #debugger
 
     editNode: () ->
       newText = prompt("Edit the text:", @.model.get('text'))
@@ -163,36 +156,16 @@
       @.$el.css('left': transX - @.$el.width() / 2)
       @.$el.css('top': transY - @.$el.height() / 2)
       
-    translate: () ->
-      x = @.model.get("left") + @.$el.width() / 2 + window.Transform.deltaX #absolute coordinate
-      #x = @.model.get("left")  #absolute coordinate
-      y = @.model.get('top') + @.$el.height() / 2 + window.Transform.deltaY #absolute coordinate
-      #y = @.model.get('top') #absolute coordinate
+    setAbsCoordinates: (x, y) ->  # (x, y) are in relative coordinate system
       zoom = window.Transform.zoom
       distFromCenterX = x - window.Transform.centerX
       distFromCenterY = y - window.Transform.centerY
-      transX = window.Transform.centerX + (x - window.Transform.centerX) * zoom
-      transY = window.Transform.centerY + (y - window.Transform.centerY) * zoom
-      @.$el.css('transform': "scale(#{zoom})")
-      @.$el.css('left': transX - @.$el.width() / 2)
-      @.$el.css('top': transY - @.$el.height() / 2)
-
-    translate2: () ->
+      transX = window.Transform.centerX + (x - window.Transform.centerX) * 1 / zoom
+      transY = window.Transform.centerY + (y - window.Transform.centerY) * 1 / zoom
+      console.log({"left": transX - window.Transform.deltaX})
       #debugger
-      x = @.model.get("left")
-      y = @.model.get('top')
-      # x = @.$el.position().left
-      # y = @.$el.position().top
-      zoom = window.Transform.zoom
-      deltaX = window.Transform.deltaX  #input from key left or right
-      deltaY = window.Transform.deltaY  #input form key up or down
-      position = {
-        left: (x + deltaX) * zoom + "px"
-        top: (y + deltaY) * zoom + "px"
-      }
-      @.$el.css('position', 'absolute')
-      @.$el.css(position)
-      @
+      @.model.set({"left": transX - window.Transform.deltaX})
+      @.model.set({"top": transY - window.Transform.deltaY})
 
     update: () ->
       #template = @.template(@.model.toJSON())
@@ -202,11 +175,13 @@
         template = @.template(@.model.toJSON())
         @.$el.html(template)
       else
+        #debugger
         x = @.model.get("left")
         y = @.model.get('top')
-        @.$el.css('left', x)
-        @.$el.css('top', y)
-        @
+        @.zoom()
+        #@.$el.css('left', x)
+        #@.$el.css('top', y)
+        #@
 
     render: () ->
       

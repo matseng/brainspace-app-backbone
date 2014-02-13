@@ -11,7 +11,7 @@
       Views: {}
     };
     window.selectedNode = {
-      model: null,
+      modelView: null,
       offsetX: 0,
       offsetY: 0
     };
@@ -27,20 +27,15 @@
       return _.template($("#" + id).html());
     };
     $(document.body).mousemove(function(event) {
-      var selectedNode;
+      var selectedNodeView;
       event.preventDefault();
-      if (window.selectedNode.model) {
-        selectedNode = window.selectedNode.model;
-        selectedNode.set({
-          top: event.pageY - window.selectedNode.offsetY
-        });
-        return selectedNode.set({
-          left: event.pageX - window.selectedNode.offsetX
-        });
+      if (window.selectedNode.modelView) {
+        selectedNodeView = window.selectedNode.modelView;
+        return selectedNodeView.setAbsCoordinates(event.pageX - window.selectedNode.offsetX, event.pageY - window.selectedNode.offsetY);
       }
     });
     $(document.body).on("mouseup", function(event) {
-      return window.selectedNode.model = null;
+      return window.selectedNode.modelView = null;
     });
     checkKey = function(e) {
       e || e.preventDefault();
@@ -62,7 +57,7 @@
           return console.log("left arrow " + window.Transform.deltaX);
         } else if (e.keyCode === 39) {
           console.log("Repeat: Active element is: " + document.activeElement.tagName);
-          window.Transform.deltaX -= 1 * window.Transform.zoom;
+          window.Transform.deltaX -= 10 * window.Transform.zoom;
           vent.trigger('translate');
           return console.log("right arrow " + window.Transform.deltaX);
         } else if (e.keyCode === 73) {
@@ -120,7 +115,7 @@
       Node.prototype.initialize = function() {
         this.model.on('change', this.update, this);
         this.model.on('destroy', this.remove, this);
-        vent.on('translate', this.translate, this);
+        vent.on('translate', this.zoom, this);
         return vent.on('zoom', this.zoom, this);
       };
 
@@ -148,7 +143,7 @@
         offsetX = event.pageX - nodePositionX;
         offsetY = event.pageY - nodePositionY;
         return window.selectedNode = {
-          model: this.model,
+          modelView: this,
           offsetX: parseInt(offsetX),
           offsetY: parseInt(offsetY)
         };
@@ -194,40 +189,22 @@
         });
       };
 
-      Node.prototype.translate = function() {
-        var distFromCenterX, distFromCenterY, transX, transY, x, y, zoom;
-        x = this.model.get("left") + this.$el.width() / 2 + window.Transform.deltaX;
-        y = this.model.get('top') + this.$el.height() / 2 + window.Transform.deltaY;
+      Node.prototype.setAbsCoordinates = function(x, y) {
+        var distFromCenterX, distFromCenterY, transX, transY, zoom;
         zoom = window.Transform.zoom;
         distFromCenterX = x - window.Transform.centerX;
         distFromCenterY = y - window.Transform.centerY;
-        transX = window.Transform.centerX + (x - window.Transform.centerX) * zoom;
-        transY = window.Transform.centerY + (y - window.Transform.centerY) * zoom;
-        this.$el.css({
-          'transform': "scale(" + zoom + ")"
+        transX = window.Transform.centerX + (x - window.Transform.centerX) * 1 / zoom;
+        transY = window.Transform.centerY + (y - window.Transform.centerY) * 1 / zoom;
+        console.log({
+          "left": transX - window.Transform.deltaX
         });
-        this.$el.css({
-          'left': transX - this.$el.width() / 2
+        this.model.set({
+          "left": transX - window.Transform.deltaX
         });
-        return this.$el.css({
-          'top': transY - this.$el.height() / 2
+        return this.model.set({
+          "top": transY - window.Transform.deltaY
         });
-      };
-
-      Node.prototype.translate2 = function() {
-        var deltaX, deltaY, position, x, y, zoom;
-        x = this.model.get("left");
-        y = this.model.get('top');
-        zoom = window.Transform.zoom;
-        deltaX = window.Transform.deltaX;
-        deltaY = window.Transform.deltaY;
-        position = {
-          left: (x + deltaX) * zoom + "px",
-          top: (y + deltaY) * zoom + "px"
-        };
-        this.$el.css('position', 'absolute');
-        this.$el.css(position);
-        return this;
       };
 
       Node.prototype.update = function() {
@@ -238,9 +215,7 @@
         } else {
           x = this.model.get("left");
           y = this.model.get('top');
-          this.$el.css('left', x);
-          this.$el.css('top', y);
-          return this;
+          return this.zoom();
         }
       };
 
