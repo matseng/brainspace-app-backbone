@@ -33,15 +33,19 @@
     #console.log("Is modelView null: " + window.selectedNode.modelView)
     if(window.selectedNode.modelView)
       selectedNodeView = window.selectedNode.modelView
-      #selectedNode.set({top: event.pageY - window.selectedNode.offsetY})  #need to change this statement to abs coordinates
-      #selectedNode.set({left: event.pageX - window.selectedNode.offsetX})  #need to change this statement to abs coordinates
       selectedNodeView.setAbsCoordinates(event.pageX - window.selectedNode.offsetX, event.pageY - window.selectedNode.offsetY)
     else if window.mouse.down
       panX = window.mouse.x - event.pageX
       panY = window.mouse.y - event.pageY
-      window.Transform.deltaX =  - panX
-      window.Transform.deltaY = - panY
+      window.Transform.deltaX -= panX * 1 / window.Transform.zoom
+      window.Transform.deltaY -= panY * 1 / window.Transform.zoom
+      window.mouse.x = event.pageX
+      window.mouse.y = event.pageY
+      console.log("Change is relative coordinates is #{window.Transform.deltaX}, #{window.Transform.deltaX}")
       vent.trigger('pan')
+    else
+      window.selectedNode.modelView = null
+      window.mouse.down = false
   )
 
   $(document.body).on("mouseup", (event) -> 
@@ -58,14 +62,8 @@
       window.mouse.down = true
       window.mouse.x = e.pageX
       window.mouse.y = e.pageY
-      console.log("No node is currently selected: mouse is #{window.mouse.x}, #{window.mouse.y}")
+      console.log("mousedown is #{window.mouse.x}, #{window.mouse.y}")
   )
-
-  #check if a node is NOT selected
-  #mousemove for current xy --> delta xy
-  #tigger pan event
-
-
 
   checkKey = (e) ->
     e || e.preventDefault()
@@ -172,8 +170,8 @@
       @.$el.remove()
 
     zoom: () ->
-      x = @.model.get("left") + @.$el.width() / 2 + window.Transform.deltaX #absolute coordinate
-      y = @.model.get('top') + @.$el.height() / 2 + window.Transform.deltaY #absolute coordinate
+      x = @.model.get("left") + @.$el.width() / 2 + window.Transform.deltaX  #absolute coordinate
+      y = @.model.get('top') + @.$el.height() / 2 + window.Transform.deltaY  #absolute coordinate
       zoom = window.Transform.zoom
       distFromCenterX = x - window.Transform.centerX
       distFromCenterY = y - window.Transform.centerY
@@ -200,13 +198,7 @@
         template = @.template(@.model.toJSON())
         @.$el.html(template)
       else
-        #debugger
-        x = @.model.get("left")
-        y = @.model.get('top')
         @.zoom()
-        #@.$el.css('left', x)
-        #@.$el.css('top', y)
-        #@
 
     render: () ->
       

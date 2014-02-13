@@ -40,9 +40,15 @@
       } else if (window.mouse.down) {
         panX = window.mouse.x - event.pageX;
         panY = window.mouse.y - event.pageY;
-        window.Transform.deltaX = -panX;
-        window.Transform.deltaY = -panY;
+        window.Transform.deltaX -= panX * 1 / window.Transform.zoom;
+        window.Transform.deltaY -= panY * 1 / window.Transform.zoom;
+        window.mouse.x = event.pageX;
+        window.mouse.y = event.pageY;
+        console.log("Change is relative coordinates is " + window.Transform.deltaX + ", " + window.Transform.deltaX);
         return vent.trigger('pan');
+      } else {
+        window.selectedNode.modelView = null;
+        return window.mouse.down = false;
       }
     });
     $(document.body).on("mouseup", function(event) {
@@ -54,7 +60,7 @@
         window.mouse.down = true;
         window.mouse.x = e.pageX;
         window.mouse.y = e.pageY;
-        return console.log("No node is currently selected: mouse is " + window.mouse.x + ", " + window.mouse.y);
+        return console.log("mousedown is " + window.mouse.x + ", " + window.mouse.y);
       }
     });
     checkKey = function(e) {
@@ -224,13 +230,11 @@
       };
 
       Node.prototype.update = function() {
-        var template, x, y;
+        var template;
         if ((this.model.changedAttributes().text)) {
           template = this.template(this.model.toJSON());
           return this.$el.html(template);
         } else {
-          x = this.model.get("left");
-          y = this.model.get('top');
           return this.zoom();
         }
       };
