@@ -17,6 +17,10 @@
     centerX: 0
     centerY: 0
   }
+  window.mouse = {
+    prevX: 0
+    prevY: 0
+  }
 
   vent = _.extend({}, Backbone.Events)
 
@@ -37,28 +41,38 @@
     window.selectedNode.modelView = null
   )
 
+  #drag to pan screen (2 helpers)
+
+  #1 of 2: check if a node is NOT selected
+  #mousedown for current xy
+
+  #check if a node is NOT selected
+  #mousemove for current xy --> delta xy
+  #tigger pan event
+
+
+
   checkKey = (e) ->
     e || e.preventDefault()
     e = e || window.event
     console.log("Event is: " + e.keyCode)
     console.log("Active element is: " + document.activeElement.tagName)
-    if document.activeElement.tagName != "INPUT"
+    if document.activeElement.parentNode.tagName != "FORM"
       if e.keyCode == 38
-        window.Transform.deltaY += 10 * window.Transform.zoom
-        vent.trigger('translate')
+        window.Transform.deltaY += 10 * window.Transform.zoom * window.Transform.zoom
+        vent.trigger('pan')
         console.log("up arrow " + window.Transform.deltaY)
       else if e.keyCode == 40
-        window.Transform.deltaY -= 10 * window.Transform.zoom
-        vent.trigger('translate')
+        window.Transform.deltaY -= 10 * window.Transform.zoom * window.Transform.zoom
+        vent.trigger('pan')
         console.log("down arrow " + window.Transform.deltaY)
       else if e.keyCode == 37
-        window.Transform.deltaX += 10 * window.Transform.zoom
-        vent.trigger('translate')
+        window.Transform.deltaX += 10 * window.Transform.zoom * window.Transform.zoom
+        vent.trigger('pan')
         console.log("left arrow " + window.Transform.deltaX)
       else if e.keyCode == 39
-        console.log("Repeat: Active element is: " + document.activeElement.tagName)
-        window.Transform.deltaX -= 10 * window.Transform.zoom
-        vent.trigger('translate')
+        window.Transform.deltaX -= 10 * window.Transform.zoom * window.Transform.zoom
+        vent.trigger('pan')
         console.log("right arrow " + window.Transform.deltaX)
       else if e.keyCode == 73  #In
         window.Transform.centerX = $('body').width() / 2
@@ -97,7 +111,7 @@
     initialize: () ->
       @.model.on('change', @.update, @)
       @.model.on('destroy', @.remove, @)
-      vent.on('translate', @.zoom, @)
+      vent.on('pan', @.zoom, @)
       vent.on('zoom', @.zoom, @)
 
     events: {
@@ -144,9 +158,7 @@
 
     zoom: () ->
       x = @.model.get("left") + @.$el.width() / 2 + window.Transform.deltaX #absolute coordinate
-      #x = @.model.get("left")  #absolute coordinate
       y = @.model.get('top') + @.$el.height() / 2 + window.Transform.deltaY #absolute coordinate
-      #y = @.model.get('top') #absolute coordinate
       zoom = window.Transform.zoom
       distFromCenterX = x - window.Transform.centerX
       distFromCenterY = y - window.Transform.centerY
@@ -238,8 +250,8 @@
     
     submit: (e) ->
       e.preventDefault()
-      text = $(e.currentTarget).find('input[name=text]').val()
-      #console.log(text)
+      text = $(e.currentTarget).find('textarea[name=text]').val()
+      text = text.replace(/\n/g, '<br>')
       username = $(e.currentTarget).find('input[name=username]').val()
       node = new App.Models.Node({
         text: text || "empty"

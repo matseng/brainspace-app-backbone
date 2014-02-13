@@ -22,6 +22,10 @@
       centerX: 0,
       centerY: 0
     };
+    window.mouse = {
+      prevX: 0,
+      prevY: 0
+    };
     vent = _.extend({}, Backbone.Events);
     window.template = function(id) {
       return _.template($("#" + id).html());
@@ -42,23 +46,22 @@
       e = e || window.event;
       console.log("Event is: " + e.keyCode);
       console.log("Active element is: " + document.activeElement.tagName);
-      if (document.activeElement.tagName !== "INPUT") {
+      if (document.activeElement.parentNode.tagName !== "FORM") {
         if (e.keyCode === 38) {
-          window.Transform.deltaY += 10 * window.Transform.zoom;
-          vent.trigger('translate');
+          window.Transform.deltaY += 10 * window.Transform.zoom * window.Transform.zoom;
+          vent.trigger('pan');
           return console.log("up arrow " + window.Transform.deltaY);
         } else if (e.keyCode === 40) {
-          window.Transform.deltaY -= 10 * window.Transform.zoom;
-          vent.trigger('translate');
+          window.Transform.deltaY -= 10 * window.Transform.zoom * window.Transform.zoom;
+          vent.trigger('pan');
           return console.log("down arrow " + window.Transform.deltaY);
         } else if (e.keyCode === 37) {
-          window.Transform.deltaX += 10 * window.Transform.zoom;
-          vent.trigger('translate');
+          window.Transform.deltaX += 10 * window.Transform.zoom * window.Transform.zoom;
+          vent.trigger('pan');
           return console.log("left arrow " + window.Transform.deltaX);
         } else if (e.keyCode === 39) {
-          console.log("Repeat: Active element is: " + document.activeElement.tagName);
-          window.Transform.deltaX -= 10 * window.Transform.zoom;
-          vent.trigger('translate');
+          window.Transform.deltaX -= 10 * window.Transform.zoom * window.Transform.zoom;
+          vent.trigger('pan');
           return console.log("right arrow " + window.Transform.deltaX);
         } else if (e.keyCode === 73) {
           window.Transform.centerX = $('body').width() / 2;
@@ -115,7 +118,7 @@
       Node.prototype.initialize = function() {
         this.model.on('change', this.update, this);
         this.model.on('destroy', this.remove, this);
-        vent.on('translate', this.zoom, this);
+        vent.on('pan', this.zoom, this);
         return vent.on('zoom', this.zoom, this);
       };
 
@@ -302,7 +305,8 @@
       AddNode.prototype.submit = function(e) {
         var node, text, username;
         e.preventDefault();
-        text = $(e.currentTarget).find('input[name=text]').val();
+        text = $(e.currentTarget).find('textarea[name=text]').val();
+        text = text.replace(/\n/g, '<br>');
         username = $(e.currentTarget).find('input[name=username]').val();
         node = new App.Models.Node({
           text: text || "empty",
