@@ -5,11 +5,14 @@
   </head>
   <body>
     <h1> BrainSpace</h1>
-    <form id="addNote">
-      <textarea name='text' rows='3' cols="35" placeholder="Your new note"></textarea>
-      <input name='username' type="text" placeholder="Your name">
-      <input type="submit" value="Add note">
-    </form>
+    <div id="inputContainer">
+      <form id="addNote">
+        <textarea name='text' rows='3' cols="35" placeholder="Your new note"></textarea>
+        <input name='username' type="text" placeholder="Your name">
+        <input type="submit" value="Add note">
+      </form>
+      <input type="file" accept="image/*" capture="camera" id="file-upload"> 
+    </div>
     <div>
       <span> <strong>i</strong> to zoom in </span> </br>
       <span> <strong>o</strong> to zoom out </span>

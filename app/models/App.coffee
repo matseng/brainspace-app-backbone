@@ -53,10 +53,6 @@
     window.mouse.down = false
   )
 
-  #drag to pan screen (2 helpers)
-
-  #1 of 2: check if a node is NOT selected
-  #mousedown for current xy
   $(document.body).on("mousedown", (e) ->
     if !window.selectedNode.modelView
       window.mouse.down = true
@@ -111,6 +107,7 @@
     text: 'Hack Reactor'
     top: null
     left: null
+    #image: null  #keep URL here, store image in firebase
     }
     validate: (attrs) ->
       if attrs.text is null
@@ -175,8 +172,8 @@
       zoom = window.Transform.zoom
       distFromCenterX = x - window.Transform.centerX
       distFromCenterY = y - window.Transform.centerY
-      transX = window.Transform.centerX + (x - window.Transform.centerX) * zoom
-      transY = window.Transform.centerY + (y - window.Transform.centerY) * zoom
+      transX = window.Transform.centerX + distFromCenterX * zoom
+      transY = window.Transform.centerY + distFromCenterY * zoom
       @.$el.css('transform': "scale(#{zoom})")
       @.$el.css('left': transX - @.$el.width() / 2)
       @.$el.css('top': transY - @.$el.height() / 2)
@@ -246,14 +243,21 @@
       $("#" + model.id).detach()
 
   class App.Views.AddNode extends Backbone.View
-    el: '#addNote'
+    # el: '#addNote'
+    el: '#inputContainer'
     
     events: {
       'submit': 'submit'
+      'change': 'uploadImage'
+      'click #file-upload': 'uploadImage'
+      'mouseenter': 'mouseenter'
     }
 
-    #initialize: () ->
-      #console.log(@.el.innerHTML)
+    mouseenter: (e) ->
+      debugger
+      
+    uploadImage: (e) ->
+      debugger
     
     submit: (e) ->
       e.preventDefault()
