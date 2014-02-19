@@ -123,6 +123,14 @@
     validate: (attrs) ->
       if attrs.text is null
         "Text requires a valid string"
+    setAbsCoordinates: (x, y) ->  # (x, y) are in relative coordinate system
+      zoom = window.Transform.zoom
+      distFromCenterX = x - window.Transform.centerX
+      distFromCenterY = y - window.Transform.centerY
+      transX = window.Transform.centerX + (x - window.Transform.centerX) * 1 / zoom
+      transY = window.Transform.centerY + (y - window.Transform.centerY) * 1 / zoom      
+      @.set({"left": transX - window.Transform.deltaX})
+      @.set({"top": transY - window.Transform.deltaY})
 
   class App.Views.Node extends Backbone.View
     tagName: 'li'
@@ -167,7 +175,6 @@
       newText = prompt("Edit the text:", @.model.get('text'))
       if newText is null
         return
-
       currentNode = @.model
       currentNode.set({'text': newText})
 
@@ -256,9 +263,9 @@
       #debugger
       nodeView.$el.attr("id", node.id)
       @.$el.prepend(nodeView.render().el)
+      nodeView.render()  #Bug requires second render invocation
 
     removeOne: (model, coll, opt) ->
-      #debugger
       $("#" + model.id).detach()
 
   class App.Views.AddNode extends Backbone.View
@@ -267,14 +274,14 @@
     
     events: {
       'submit #addNote': 'submit'
-      'change #file-upload3': 'submit3'
+      'change #file-upload': 'fileUpload'
 
     }
 
     initialize: () ->
       vent.on('pasteImage', @.pasteImage, @)
       
-    submit3: (evt) ->
+    fileUpload: (evt) ->
       that = @
       f = evt.target.files[0]
       reader = new FileReader()
@@ -322,6 +329,7 @@
             username: 'me of course'
             imageData: filePayload
           })
+          node.setAbsCoordinates($('body').width() / 2, $('body').height() / 2)
           that.collection.add(node)
         reader.readAsDataURL(blob)
 

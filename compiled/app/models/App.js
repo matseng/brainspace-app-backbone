@@ -128,6 +128,21 @@
         }
       };
 
+      Node.prototype.setAbsCoordinates = function(x, y) {
+        var distFromCenterX, distFromCenterY, transX, transY, zoom;
+        zoom = window.Transform.zoom;
+        distFromCenterX = x - window.Transform.centerX;
+        distFromCenterY = y - window.Transform.centerY;
+        transX = window.Transform.centerX + (x - window.Transform.centerX) * 1 / zoom;
+        transY = window.Transform.centerY + (y - window.Transform.centerY) * 1 / zoom;
+        this.set({
+          "left": transX - window.Transform.deltaX
+        });
+        return this.set({
+          "top": transY - window.Transform.deltaY
+        });
+      };
+
       return Node;
 
     })(Backbone.Model);
@@ -311,7 +326,8 @@
           model: node
         });
         nodeView.$el.attr("id", node.id);
-        return this.$el.prepend(nodeView.render().el);
+        this.$el.prepend(nodeView.render().el);
+        return nodeView.render();
       };
 
       NodesCollection.prototype.removeOne = function(model, coll, opt) {
@@ -332,14 +348,14 @@
 
       AddNode.prototype.events = {
         'submit #addNote': 'submit',
-        'change #file-upload3': 'submit3'
+        'change #file-upload': 'fileUpload'
       };
 
       AddNode.prototype.initialize = function() {
         return vent.on('pasteImage', this.pasteImage, this);
       };
 
-      AddNode.prototype.submit3 = function(evt) {
+      AddNode.prototype.fileUpload = function(evt) {
         var f, reader, that;
         that = this;
         f = evt.target.files[0];
@@ -396,6 +412,7 @@
               username: 'me of course',
               imageData: filePayload
             });
+            node.setAbsCoordinates($('body').width() / 2, $('body').height() / 2);
             return that.collection.add(node);
           };
           return reader.readAsDataURL(blob);
