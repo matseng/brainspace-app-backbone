@@ -101,10 +101,16 @@
 
   document.onkeydown = checkKey
 
-  Mousetrap.bind('command+shift+k', (e) ->
-    console.log('Mousetrap working with command shift k')
-  )
+  # Mousetrap.bind('command+v', (e) ->
+  #   console.log('Mousetrap working with command-v')
+  #   debugger
+  #   vent.trigger('pasteImage', e)  #e becomes an arguement that gets passed to callback contained in listeners
+  # )
 
+  pasteHandler = (e) ->
+    vent.trigger('pasteImage', e)  #e becomes an arguement that gets passed to callback contained in listeners
+    
+  window.addEventListener("paste", pasteHandler)
 
   class App.Models.Node extends Backbone.Model
     defaults: {
@@ -128,6 +134,7 @@
       @.model.on('destroy', @.remove, @)
       vent.on('pan', @.zoom, @)
       vent.on('zoom', @.zoom, @)
+      # vent.on('pasteImage', @.pasteImage, @)
 
     events: {
       'click .edit': 'editNode'
@@ -259,13 +266,13 @@
     
     events: {
       'submit #addNote': 'submit'
-      'submit #addNote2': 'submit2'
       'change #file-upload3': 'submit3'
 
     }
 
-    #initialize: () ->
-      #console.log(@.el.innerHTML)
+    initialize: () ->
+      vent.on('pasteImage', @.pasteImage, @)
+      
     submit3: (evt) ->
       that = @
       f = evt.target.files[0]
@@ -282,18 +289,6 @@
       )(f)
       reader.readAsDataURL(f)
 
-    submit2: (e) ->
-      e.preventDefault()
-      debugger
-      text = $(e.currentTarget).find('textarea[name=text]').val()
-      text = text.replace(/\n/g, '<br>')
-      username = $(e.currentTarget).find('input[name=username]').val()
-      node = new App.Models.Node({
-        text: text || "empty"
-        username: username || 'anonymous'
-      })
-      @.collection.add(node)
-    
     submit: (e) ->
       e.preventDefault()
       debugger
@@ -306,6 +301,33 @@
       })
       @.collection.add(node)
       #vent.trigger('zoom')
+    pasteImage: (event) ->
+      that = @
+      clipboardData = event.clipboardData  ||  event.originalEvent.clipboardData
+      items = clipboardData.items;
+      i = 0
+      while i < items.length
+        console.log(i)
+        if items[i].type.indexOf("image") == 0 
+          blob = items[i].getAsFile()
+          i = items.length
+        i++
+      # load image if there is a pasted image:
+      debugger
+      if (blob != null)
+        reader = new FileReader();
+        reader.onload = ((theFile) -> 
+          return (e) -> 
+            filePayload = e.target.result
+            debugger
+            node = new App.Models.Node({
+              text: "no text yet"
+              username: 'me of course'
+              imageData: filePayload
+            })
+            that.collection.add(node)
+        )(blob)
+        reader.readAsDataURL(blob)
 
   # nodeCollection = new App.Collections.Nodes([
   #   {

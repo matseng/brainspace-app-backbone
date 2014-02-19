@@ -4,7 +4,7 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   (function() {
-    var addNodeView, checkKey, collectionNodes, nodeCollectionView, vent;
+    var addNodeView, checkKey, collectionNodes, nodeCollectionView, pasteHandler, vent;
     window.App = {
       Models: {},
       Collections: {},
@@ -103,9 +103,10 @@
       }
     };
     document.onkeydown = checkKey;
-    Mousetrap.bind('command+shift+k', function(e) {
-      return console.log('Mousetrap working with command shift k');
-    });
+    pasteHandler = function(e) {
+      return vent.trigger('pasteImage', e);
+    };
+    window.addEventListener("paste", pasteHandler);
     App.Models.Node = (function(_super) {
       __extends(Node, _super);
 
@@ -330,8 +331,11 @@
 
       AddNode.prototype.events = {
         'submit #addNote': 'submit',
-        'submit #addNote2': 'submit2',
         'change #file-upload3': 'submit3'
+      };
+
+      AddNode.prototype.initialize = function() {
+        return vent.on('pasteImage', this.pasteImage, this);
       };
 
       AddNode.prototype.submit3 = function(evt) {
@@ -354,7 +358,7 @@
         return reader.readAsDataURL(f);
       };
 
-      AddNode.prototype.submit2 = function(e) {
+      AddNode.prototype.submit = function(e) {
         var node, text, username;
         e.preventDefault();
         debugger;
@@ -368,18 +372,38 @@
         return this.collection.add(node);
       };
 
-      AddNode.prototype.submit = function(e) {
-        var node, text, username;
-        e.preventDefault();
+      AddNode.prototype.pasteImage = function(event) {
+        var blob, clipboardData, i, items, reader, that;
+        that = this;
+        clipboardData = event.clipboardData || event.originalEvent.clipboardData;
+        items = clipboardData.items;
+        i = 0;
+        while (i < items.length) {
+          console.log(i);
+          if (items[i].type.indexOf("image") === 0) {
+            blob = items[i].getAsFile();
+            i = items.length;
+          }
+          i++;
+        }
         debugger;
-        text = $(e.currentTarget).find('textarea[name=text]').val();
-        text = text.replace(/\n/g, '<br>');
-        username = $(e.currentTarget).find('input[name=username]').val();
-        node = new App.Models.Node({
-          text: text || "empty",
-          username: username || 'anonymous'
-        });
-        return this.collection.add(node);
+        if (blob !== null) {
+          reader = new FileReader();
+          reader.onload = (function(theFile) {
+            return function(e) {
+              var filePayload, node;
+              filePayload = e.target.result;
+              debugger;
+              node = new App.Models.Node({
+                text: "no text yet",
+                username: 'me of course',
+                imageData: filePayload
+              });
+              return that.collection.add(node);
+            };
+          })(blob);
+          return reader.readAsDataURL(blob);
+        }
       };
 
       return AddNode;
