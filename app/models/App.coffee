@@ -101,13 +101,18 @@
 
   document.onkeydown = checkKey
 
+  Mousetrap.bind('command+shift+k', (e) ->
+    console.log('Mousetrap working with command shift k')
+  )
+
+
   class App.Models.Node extends Backbone.Model
     defaults: {
     username: "Mikey Testing T"
     text: 'Hack Reactor'
     top: null
     left: null
-    #image: null  #keep URL here, store image in firebase
+    imageData: null
     }
     validate: (attrs) ->
       if attrs.text is null
@@ -127,7 +132,8 @@
     events: {
       'click .edit': 'editNode'
       'click .delete': 'deleteNode'
-      'mousedown span': 'mouseDownSelectNode'
+      # 'mousedown span': 'mouseDownSelectNode'
+      'mousedown': 'mouseDownSelectNode'
       'mouseenter': 'mouseenter'
       'mouseleave': 'mouseleave'
     }
@@ -192,8 +198,9 @@
       #@.$el.html(template)
       #@.$el.css('position', 'absolute')
       if(@.model.changedAttributes().text)
-        template = @.template(@.model.toJSON())
-        @.$el.html(template)
+        newPromptText = @.model.get('text')
+        @.$el.find('.text').text(newPromptText)
+        debugger
       else
         @.zoom()
 
@@ -206,6 +213,10 @@
       y = @.model.get('top')
       @.$el.css('left', x)
       @.$el.css('top', y)
+      if @.model.get('imageData') != null
+        imageTag = '<img class="pano" id="pano" />'
+        image = $(imageTag).attr('src', @.model.get('imageData'))
+        @.$el.append(image)
       @
 
   #class App.Collections.Nodes extends Backbone.Collection
@@ -243,24 +254,49 @@
       $("#" + model.id).detach()
 
   class App.Views.AddNode extends Backbone.View
-    # el: '#addNote'
+    #el: '#addNote'
     el: '#inputContainer'
     
     events: {
-      'submit': 'submit'
-      'change': 'uploadImage'
-      'click #file-upload': 'uploadImage'
-      'mouseenter': 'mouseenter'
+      'submit #addNote': 'submit'
+      'submit #addNote2': 'submit2'
+      'change #file-upload3': 'submit3'
+
     }
 
-    mouseenter: (e) ->
+    #initialize: () ->
+      #console.log(@.el.innerHTML)
+    submit3: (evt) ->
+      that = @
+      f = evt.target.files[0]
+      reader = new FileReader()
+      reader.onload = ((theFile) -> 
+        return (e) -> 
+          filePayload = e.target.result
+          node = new App.Models.Node({
+            text: "no text yet"
+            username: 'me of course'
+            imageData: filePayload
+          })
+          that.collection.add(node)
+      )(f)
+      reader.readAsDataURL(f)
+
+    submit2: (e) ->
+      e.preventDefault()
       debugger
-      
-    uploadImage: (e) ->
-      debugger
+      text = $(e.currentTarget).find('textarea[name=text]').val()
+      text = text.replace(/\n/g, '<br>')
+      username = $(e.currentTarget).find('input[name=username]').val()
+      node = new App.Models.Node({
+        text: text || "empty"
+        username: username || 'anonymous'
+      })
+      @.collection.add(node)
     
     submit: (e) ->
       e.preventDefault()
+      debugger
       text = $(e.currentTarget).find('textarea[name=text]').val()
       text = text.replace(/\n/g, '<br>')
       username = $(e.currentTarget).find('input[name=username]').val()

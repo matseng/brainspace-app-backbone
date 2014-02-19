@@ -11,7 +11,13 @@
         <input name='username' type="text" placeholder="Your name">
         <input type="submit" value="Add note">
       </form>
-      <input type="file" accept="image/*" capture="camera" id="file-upload"> 
+      <form id="addNote2">
+        <textarea name='text' rows='3' cols="35" placeholder="Your new note"></textarea>
+        <input name='username' type="text" placeholder="Your name">
+        <input type="file" accept="image/*" capture="camera" id="file-upload"> 
+        <input type="submit" value="Add note">
+      </form>
+      <input type="file" accept="image/*" capture="camera" id="file-upload3"> 
     </div>
     <div>
       <span> <strong>i</strong> to zoom in </span> </br>
@@ -19,14 +25,16 @@
     </div>
     <div class='nodes'> </div>
     <script id="nodeTemplate" type="text/template"> 
-      <strong><span><%= text %></span></strong> <span class="nodeMenu"><span>(<%= username %>)</span><button class="edit">Edit</edit> <button class="delete">Delete</button></span>
+      <div>
+        <strong><span class='text'><%= text %></span></strong> <span class="nodeMenu"><span>(<%= username %>)</span><button class="edit">Edit</edit> <button class="delete">Delete</button></span>
+      </div>
     </script>
     <script src="lib/jquery.js"></script>
     <script src="lib/underscore.js"></script>
     <script src="lib/backbone.js"></script>
     <script src="https://cdn.firebase.com/v0/firebase.js"></script>
     <script src="https://cdn.firebase.com/libs/backfire/0.3.0/backbone-firebase.min.js"></script>
-
+    <script src="lib/mousetrap.min.js"></script>
     <script src="compiled/app/models/App.js"></script>
 
 <!--    <script src="compiled/app/views/AppView.js"></script>  

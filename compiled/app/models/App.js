@@ -103,6 +103,9 @@
       }
     };
     document.onkeydown = checkKey;
+    Mousetrap.bind('command+shift+k', function(e) {
+      return console.log('Mousetrap working with command shift k');
+    });
     App.Models.Node = (function(_super) {
       __extends(Node, _super);
 
@@ -114,7 +117,8 @@
         username: "Mikey Testing T",
         text: 'Hack Reactor',
         top: null,
-        left: null
+        left: null,
+        imageData: null
       };
 
       Node.prototype.validate = function(attrs) {
@@ -147,7 +151,7 @@
       Node.prototype.events = {
         'click .edit': 'editNode',
         'click .delete': 'deleteNode',
-        'mousedown span': 'mouseDownSelectNode',
+        'mousedown': 'mouseDownSelectNode',
         'mouseenter': 'mouseenter',
         'mouseleave': 'mouseleave'
       };
@@ -201,8 +205,8 @@
         zoom = window.Transform.zoom;
         distFromCenterX = x - window.Transform.centerX;
         distFromCenterY = y - window.Transform.centerY;
-        transX = window.Transform.centerX + (x - window.Transform.centerX) * zoom;
-        transY = window.Transform.centerY + (y - window.Transform.centerY) * zoom;
+        transX = window.Transform.centerX + distFromCenterX * zoom;
+        transY = window.Transform.centerY + distFromCenterY * zoom;
         this.$el.css({
           'transform': "scale(" + zoom + ")"
         });
@@ -230,17 +234,18 @@
       };
 
       Node.prototype.update = function() {
-        var template;
+        var newPromptText;
         if ((this.model.changedAttributes().text)) {
-          template = this.template(this.model.toJSON());
-          return this.$el.html(template);
+          newPromptText = this.model.get('text');
+          this.$el.find('.text').text(newPromptText);
+          debugger;
         } else {
           return this.zoom();
         }
       };
 
       Node.prototype.render = function() {
-        var template, x, y;
+        var image, imageTag, template, x, y;
         template = this.template(this.model.toJSON());
         this.$el.html(template);
         this.$el.css('position', 'absolute');
@@ -248,6 +253,11 @@
         y = this.model.get('top');
         this.$el.css('left', x);
         this.$el.css('top', y);
+        if (this.model.get('imageData') !== null) {
+          imageTag = '<img class="pano" id="pano" />';
+          image = $(imageTag).attr('src', this.model.get('imageData'));
+          this.$el.append(image);
+        }
         return this;
       };
 
@@ -316,15 +326,52 @@
         return AddNode.__super__.constructor.apply(this, arguments);
       }
 
-      AddNode.prototype.el = '#addNote';
+      AddNode.prototype.el = '#inputContainer';
 
       AddNode.prototype.events = {
-        'submit': 'submit'
+        'submit #addNote': 'submit',
+        'submit #addNote2': 'submit2',
+        'change #file-upload3': 'submit3'
+      };
+
+      AddNode.prototype.submit3 = function(evt) {
+        var f, reader, that;
+        that = this;
+        f = evt.target.files[0];
+        reader = new FileReader();
+        reader.onload = (function(theFile) {
+          return function(e) {
+            var filePayload, node;
+            filePayload = e.target.result;
+            node = new App.Models.Node({
+              text: "no text yet",
+              username: 'me of course',
+              imageData: filePayload
+            });
+            return that.collection.add(node);
+          };
+        })(f);
+        return reader.readAsDataURL(f);
+      };
+
+      AddNode.prototype.submit2 = function(e) {
+        var node, text, username;
+        e.preventDefault();
+        debugger;
+        text = $(e.currentTarget).find('textarea[name=text]').val();
+        text = text.replace(/\n/g, '<br>');
+        username = $(e.currentTarget).find('input[name=username]').val();
+        node = new App.Models.Node({
+          text: text || "empty",
+          username: username || 'anonymous'
+        });
+        return this.collection.add(node);
       };
 
       AddNode.prototype.submit = function(e) {
         var node, text, username;
         e.preventDefault();
+        debugger;
         text = $(e.currentTarget).find('textarea[name=text]').val();
         text = text.replace(/\n/g, '<br>');
         username = $(e.currentTarget).find('input[name=username]').val();
