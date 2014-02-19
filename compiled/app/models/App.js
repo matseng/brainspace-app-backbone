@@ -259,6 +259,7 @@
           image = $(imageTag).attr('src', this.model.get('imageData'));
           this.$el.append(image);
         }
+        this.zoom();
         return this;
       };
 
@@ -361,7 +362,6 @@
       AddNode.prototype.submit = function(e) {
         var node, text, username;
         e.preventDefault();
-        debugger;
         text = $(e.currentTarget).find('textarea[name=text]').val();
         text = text.replace(/\n/g, '<br>');
         username = $(e.currentTarget).find('input[name=username]').val();
@@ -386,22 +386,18 @@
           }
           i++;
         }
-        debugger;
         if (blob !== null) {
           reader = new FileReader();
-          reader.onload = (function(theFile) {
-            return function(e) {
-              var filePayload, node;
-              filePayload = e.target.result;
-              debugger;
-              node = new App.Models.Node({
-                text: "no text yet",
-                username: 'me of course',
-                imageData: filePayload
-              });
-              return that.collection.add(node);
-            };
-          })(blob);
+          reader.onloadend = function(e) {
+            var filePayload, node;
+            filePayload = e.target.result;
+            node = new App.Models.Node({
+              text: "Title goes here",
+              username: 'me of course',
+              imageData: filePayload
+            });
+            return that.collection.add(node);
+          };
           return reader.readAsDataURL(blob);
         }
       };

@@ -224,6 +224,7 @@
         imageTag = '<img class="pano" id="pano" />'
         image = $(imageTag).attr('src', @.model.get('imageData'))
         @.$el.append(image)
+      @.zoom()
       @
 
   #class App.Collections.Nodes extends Backbone.Collection
@@ -291,7 +292,6 @@
 
     submit: (e) ->
       e.preventDefault()
-      debugger
       text = $(e.currentTarget).find('textarea[name=text]').val()
       text = text.replace(/\n/g, '<br>')
       username = $(e.currentTarget).find('input[name=username]').val()
@@ -312,29 +312,20 @@
           blob = items[i].getAsFile()
           i = items.length
         i++
-      # load image if there is a pasted image:
-      debugger
+      # load image if there is a pasted image:      
       if (blob != null)
         reader = new FileReader();
-        reader.onload = ((theFile) -> 
-          return (e) -> 
-            filePayload = e.target.result
-            debugger
-            node = new App.Models.Node({
-              text: "no text yet"
-              username: 'me of course'
-              imageData: filePayload
-            })
-            that.collection.add(node)
-        )(blob)
+        reader.onloadend = (e) -> 
+          filePayload = e.target.result
+          node = new App.Models.Node({
+            text: "Title goes here"
+            username: 'me of course'
+            imageData: filePayload
+          })
+          that.collection.add(node)
         reader.readAsDataURL(blob)
 
-  # nodeCollection = new App.Collections.Nodes([
-  #   {
-  #   username: "Mike T"
-  #   text: "Hello World"
-  #   }
-  # ])
+ 
 
   #nodeView = new App.Views.Node({model: new App.Model.Node()})
   collectionNodes = new App.Collections.Nodes()
