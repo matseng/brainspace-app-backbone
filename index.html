@@ -16,11 +16,28 @@
     <div>
       <span> <strong>i</strong> to zoom in </span> </br>
       <span> <strong>o</strong> to zoom out </span>
+      <select>
+            <option value='25'> 25 </option>
+            <option value='50'> 50 </option>
+            <option value='100'> 100 </option>
+            <option value='200'> 200 </option>
+          </select>
     </div>
     <div class='nodes'> </div>
     <script id="nodeTemplate" type="text/template"> 
       <div>
-        <strong><span class='text'><%= text %></span></strong> <span class="nodeMenu"><span>(<%= username %>)</span><button class="edit">Edit</edit> <button class="delete">Delete</button></span>
+        <strong><span class='text'><%= text %></span></strong> 
+        <span>(<%= username %>)</span>
+        <span class="nodeMenu">
+          <button class="edit">Edit</edit> 
+          <button class="delete">Delete</button>
+          <select>
+            <option value='25'> 25 </option>
+            <option value='50'> 50 </option>
+            <option value='100'> 100 </option>
+            <option value='200'> 200 </option>
+          </select>
+        </span>
       </div>
     </script>
     <script src="lib/jquery.js"></script>

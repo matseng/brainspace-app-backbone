@@ -30,25 +30,25 @@
 
   $(document.body).mousemove( (event) -> 
     event.preventDefault()
-    #console.log("Is modelView null: " + window.selectedNode.modelView)
-    if(window.selectedNode.modelView)
-      selectedNodeView = window.selectedNode.modelView
-      selectedNodeView.setAbsCoordinates(event.pageX - window.selectedNode.offsetX, event.pageY - window.selectedNode.offsetY)
-    else if window.mouse.down
-      panX = window.mouse.x - event.pageX
-      panY = window.mouse.y - event.pageY
-      window.Transform.deltaX -= panX * 1 / window.Transform.zoom
-      window.Transform.deltaY -= panY * 1 / window.Transform.zoom
-      window.mouse.x = event.pageX
-      window.mouse.y = event.pageY
-      console.log("Change is relative coordinates is #{window.Transform.deltaX}, #{window.Transform.deltaX}")
-      vent.trigger('pan')
-    else
-      window.selectedNode.modelView = null
-      window.mouse.down = false
+    if(event.which == 1)  #the mouse is down and being dragged!!!
+      if(window.selectedNode.modelView)
+        selectedNodeView = window.selectedNode.modelView
+        selectedNodeView.setAbsCoordinates(event.pageX - window.selectedNode.offsetX, event.pageY - window.selectedNode.offsetY)
+      else if window.mouse.down
+        panX = window.mouse.x - event.pageX
+        panY = window.mouse.y - event.pageY
+        window.Transform.deltaX -= panX * 1 / window.Transform.zoom
+        window.Transform.deltaY -= panY * 1 / window.Transform.zoom
+        window.mouse.x = event.pageX
+        window.mouse.y = event.pageY
+        vent.trigger('pan')
+      else
+        window.selectedNode.modelView = null
+        window.mouse.down = false
   )
 
-  $(document.body).on("mouseup", (event) -> 
+  $(document.body).on("mouseup", (event) ->
+    console.log("mouseup is #{window.mouse.x}, #{window.mouse.y}")
     window.selectedNode.modelView = null
     window.mouse.down = false
   )
@@ -148,7 +148,7 @@
       'click .edit': 'editNode'
       'click .delete': 'deleteNode'
       # 'mousedown span': 'mouseDownSelectNode'
-      'mousedown': 'mouseDownSelectNode'
+      'mousedown .text': 'mouseDownSelectNode'
       'mouseenter': 'mouseenter'
       'mouseleave': 'mouseleave'
     }

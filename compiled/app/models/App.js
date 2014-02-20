@@ -34,24 +34,26 @@
     $(document.body).mousemove(function(event) {
       var panX, panY, selectedNodeView;
       event.preventDefault();
-      if (window.selectedNode.modelView) {
-        selectedNodeView = window.selectedNode.modelView;
-        return selectedNodeView.setAbsCoordinates(event.pageX - window.selectedNode.offsetX, event.pageY - window.selectedNode.offsetY);
-      } else if (window.mouse.down) {
-        panX = window.mouse.x - event.pageX;
-        panY = window.mouse.y - event.pageY;
-        window.Transform.deltaX -= panX * 1 / window.Transform.zoom;
-        window.Transform.deltaY -= panY * 1 / window.Transform.zoom;
-        window.mouse.x = event.pageX;
-        window.mouse.y = event.pageY;
-        console.log("Change is relative coordinates is " + window.Transform.deltaX + ", " + window.Transform.deltaX);
-        return vent.trigger('pan');
-      } else {
-        window.selectedNode.modelView = null;
-        return window.mouse.down = false;
+      if (event.which === 1) {
+        if (window.selectedNode.modelView) {
+          selectedNodeView = window.selectedNode.modelView;
+          return selectedNodeView.setAbsCoordinates(event.pageX - window.selectedNode.offsetX, event.pageY - window.selectedNode.offsetY);
+        } else if (window.mouse.down) {
+          panX = window.mouse.x - event.pageX;
+          panY = window.mouse.y - event.pageY;
+          window.Transform.deltaX -= panX * 1 / window.Transform.zoom;
+          window.Transform.deltaY -= panY * 1 / window.Transform.zoom;
+          window.mouse.x = event.pageX;
+          window.mouse.y = event.pageY;
+          return vent.trigger('pan');
+        } else {
+          window.selectedNode.modelView = null;
+          return window.mouse.down = false;
+        }
       }
     });
     $(document.body).on("mouseup", function(event) {
+      console.log("mouseup is " + window.mouse.x + ", " + window.mouse.y);
       window.selectedNode.modelView = null;
       return window.mouse.down = false;
     });
@@ -167,7 +169,7 @@
       Node.prototype.events = {
         'click .edit': 'editNode',
         'click .delete': 'deleteNode',
-        'mousedown': 'mouseDownSelectNode',
+        'mousedown .text': 'mouseDownSelectNode',
         'mouseenter': 'mouseenter',
         'mouseleave': 'mouseleave'
       };
