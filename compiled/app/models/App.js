@@ -243,7 +243,9 @@
       };
 
       Node.prototype.deleteNode = function() {
-        return this.model.collection.remove(this.model);
+        if (confirm("Confirm delete")) {
+          return this.model.collection.remove(this.model);
+        }
       };
 
       Node.prototype.remove = function() {

@@ -207,9 +207,10 @@
       currentNode.set({'text': newText})
 
     deleteNode: () ->
-      #@.model.destroy()  #this destroy methods throws an error!!!
-      #@.$el.detach()  #as below, this is a workaround, but it doesn't sync changes to other users
-      @.model.collection.remove(@.model)  #destroy method is not working well with firebase
+      if confirm("Confirm delete")
+        #@.model.destroy()  #this destroy methods throws an error!!!
+        #@.$el.detach()  #as below, this is a workaround, but it doesn't sync changes to other users
+        @.model.collection.remove(@.model)  #destroy method is not working well with firebase
 
     remove: () ->
       @.$el.remove()
