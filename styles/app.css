@@ -11,3 +11,7 @@ li{
   visibility: hidden;
   white-space: nowrap;
 }
+
+.imageSizeContainer {
+  visibility: hidden;
+}

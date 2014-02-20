@@ -16,12 +16,6 @@
     <div>
       <span> <strong>i</strong> to zoom in </span> </br>
       <span> <strong>o</strong> to zoom out </span>
-      <select>
-            <option value='25'> 25 </option>
-            <option value='50'> 50 </option>
-            <option value='100'> 100 </option>
-            <option value='200'> 200 </option>
-          </select>
     </div>
     <div class='nodes'> </div>
     <script id="nodeTemplate" type="text/template"> 
@@ -31,12 +25,14 @@
         <span class="nodeMenu">
           <button class="edit">Edit</edit> 
           <button class="delete">Delete</button>
-          <select>
-            <option value='25'> 25 </option>
-            <option value='50'> 50 </option>
-            <option value='100'> 100 </option>
-            <option value='200'> 200 </option>
-          </select>
+          <span class='imageSizeContainer'> 
+            <span>Image size</span><select class='imageSizeSelector' value='100'>
+              <option value='25'> 25 </option>
+              <option value='50'> 50 </option>
+              <option value='100' selected='selected'> 100 </option>
+              <option value='200'> 200 </option>
+            </select>
+          </span>
         </span>
       </div>
     </script>

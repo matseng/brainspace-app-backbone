@@ -119,6 +119,8 @@
     top: null
     left: null
     imageData: null
+    imageSize: null
+    imageSizeValue: null
     }
     validate: (attrs) ->
       if attrs.text is null
@@ -142,25 +144,51 @@
       @.model.on('destroy', @.remove, @)
       vent.on('pan', @.zoom, @)
       vent.on('zoom', @.zoom, @)
-      # vent.on('pasteImage', @.pasteImage, @)
+      #$('.imageSizeSelector').on('change', @.changeImageSize, @)
 
     events: {
       'click .edit': 'editNode'
       'click .delete': 'deleteNode'
       # 'mousedown span': 'mouseDownSelectNode'
-      'mousedown .text': 'mouseDownSelectNode'
+      'mousedown': 'mouseDownSelectNode'
       'mouseenter': 'mouseenter'
       'mouseleave': 'mouseleave'
+      'change .imageSizeSelector': 'changeImageSize'
     }
+
+    changeImageSize: (e) ->
+      #if this nodeView has an image...
+      $image = @.$el.find('img')
+      if $image  #check if image exists, then proceed with changes
+        newSize = parseInt(e.target.value)  #e.g. 50 from select drop down menu
+        width = ''
+        height = ''
+        if newSize == 100
+          $image.css('width', "")  # set width and height to default image size
+          $image.css('height', "")
+        else
+          $image.css('width', "")  # set width and height to default image size (ie. absolute value)
+          $image.css('height', "")
+          width = Math.round($image.width() * Math.sqrt(newSize) / 10)
+          height = Math.round($image.height() * Math.sqrt(newSize) / 10)
+          $image.css('width', width)  # set width and height to default image size
+          $image.css('height', height)
+        @.model.set(
+          {imageSize: {'width': width, 'height', height}
+          imageSizeValue: newSize
+          })
+      # debugger
 
     mouseenter: () ->
       @.$el.find('.nodeMenu').css('visibility', 'visible')
+      if @.$el.find('img').length  #show image size selector only if the node contains an image
+        @.$el.find('.imageSizeContainer').css('visibility', 'visible')
 
     mouseleave: () ->
       @.$el.find('.nodeMenu').css('visibility', 'hidden')
 
     mouseDownSelectNode: (e) ->
-      e.preventDefault()
+      #e.preventDefault()
       nodePositionX = @.$el.position().left #parseInt(@.$el.css('left')) || 
       nodePositionY = @.$el.position().top #parseInt(@.$el.css('top')) || 
       offsetX = event.pageX - nodePositionX
@@ -228,9 +256,13 @@
       @.$el.css('left', x)
       @.$el.css('top', y)
       if @.model.get('imageData') != null
-        imageTag = '<img class="pano" id="pano" />'
-        image = $(imageTag).attr('src', @.model.get('imageData'))
-        @.$el.append(image)
+        imageTag = '<img class="pastedImage"/>'
+        $image = $(imageTag).attr('src', @.model.get('imageData'))
+        @.$el.append($image)
+        if @.model.get('imageSize')
+          $image.css(@.model.get('imageSize'))
+        if @.model.get('imageSizeValue')
+          @.$el.find(".imageSizeSelector").val(@.model.get('imageSizeValue'))
       @.zoom()
       @
 

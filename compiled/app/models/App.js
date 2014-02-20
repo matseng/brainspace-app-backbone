@@ -121,7 +121,9 @@
         text: 'Hack Reactor',
         top: null,
         left: null,
-        imageData: null
+        imageData: null,
+        imageSize: null,
+        imageSizeValue: null
       };
 
       Node.prototype.validate = function(attrs) {
@@ -169,13 +171,46 @@
       Node.prototype.events = {
         'click .edit': 'editNode',
         'click .delete': 'deleteNode',
-        'mousedown .text': 'mouseDownSelectNode',
+        'mousedown': 'mouseDownSelectNode',
         'mouseenter': 'mouseenter',
-        'mouseleave': 'mouseleave'
+        'mouseleave': 'mouseleave',
+        'change .imageSizeSelector': 'changeImageSize'
+      };
+
+      Node.prototype.changeImageSize = function(e) {
+        var $image, height, newSize, width;
+        $image = this.$el.find('img');
+        if ($image) {
+          newSize = parseInt(e.target.value);
+          width = '';
+          height = '';
+          if (newSize === 100) {
+            $image.css('width', "");
+            $image.css('height', "");
+          } else {
+            $image.css('width', "");
+            $image.css('height', "");
+            width = Math.round($image.width() * Math.sqrt(newSize) / 10);
+            height = Math.round($image.height() * Math.sqrt(newSize) / 10);
+            $image.css('width', width);
+            $image.css('height', height);
+          }
+          return this.model.set({
+            imageSize: {
+              'width': width,
+              'height': 'height',
+              height: height
+            },
+            imageSizeValue: newSize
+          });
+        }
       };
 
       Node.prototype.mouseenter = function() {
-        return this.$el.find('.nodeMenu').css('visibility', 'visible');
+        this.$el.find('.nodeMenu').css('visibility', 'visible');
+        if (this.$el.find('img').length) {
+          return this.$el.find('.imageSizeContainer').css('visibility', 'visible');
+        }
       };
 
       Node.prototype.mouseleave = function() {
@@ -184,7 +219,6 @@
 
       Node.prototype.mouseDownSelectNode = function(e) {
         var nodePositionX, nodePositionY, offsetX, offsetY;
-        e.preventDefault();
         nodePositionX = this.$el.position().left;
         nodePositionY = this.$el.position().top;
         offsetX = event.pageX - nodePositionX;
@@ -263,7 +297,7 @@
       };
 
       Node.prototype.render = function() {
-        var image, imageTag, template, x, y;
+        var $image, imageTag, template, x, y;
         template = this.template(this.model.toJSON());
         this.$el.html(template);
         this.$el.css('position', 'absolute');
@@ -272,9 +306,15 @@
         this.$el.css('left', x);
         this.$el.css('top', y);
         if (this.model.get('imageData') !== null) {
-          imageTag = '<img class="pano" id="pano" />';
-          image = $(imageTag).attr('src', this.model.get('imageData'));
-          this.$el.append(image);
+          imageTag = '<img class="pastedImage"/>';
+          $image = $(imageTag).attr('src', this.model.get('imageData'));
+          this.$el.append($image);
+          if (this.model.get('imageSize')) {
+            $image.css(this.model.get('imageSize'));
+          }
+          if (this.model.get('imageSizeValue')) {
+            this.$el.find(".imageSizeSelector").val(this.model.get('imageSizeValue'));
+          }
         }
         this.zoom();
         return this;
