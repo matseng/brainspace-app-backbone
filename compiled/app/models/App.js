@@ -52,18 +52,37 @@
         }
       }
     });
+    $(document.body).on("DOMMouseScroll mousewheel wheel", function(e) {
+      e.preventDefault();
+      if (e.originalEvent.deltaY > 0) {
+        window.Transform.centerX = $('body').width() / 2;
+        window.Transform.centerY = $('body').height() / 2;
+        window.Transform.zoom *= 1.2;
+        vent.trigger('zoom');
+        return console.log("Zoom in " + window.Transform.zoom);
+      } else if (e.originalEvent.deltaY < 0) {
+        window.Transform.centerX = $('body').width() / 2;
+        window.Transform.centerY = $('body').height() / 2;
+        window.Transform.zoom *= .8;
+        vent.trigger('zoom');
+        return console.log("Zoom out " + window.Transform.zoom);
+      }
+    });
     $(document.body).on("mouseup", function(event) {
-      console.log("mouseup is " + window.mouse.x + ", " + window.mouse.y);
       window.selectedNode.modelView = null;
       return window.mouse.down = false;
     });
     $(document.body).on("mousedown", function(e) {
+      e.preventDefault();
       if (!window.selectedNode.modelView) {
         window.mouse.down = true;
         window.mouse.x = e.pageX;
-        window.mouse.y = e.pageY;
-        return console.log("mousedown is " + window.mouse.x + ", " + window.mouse.y);
+        return window.mouse.y = e.pageY;
       }
+    });
+    $(document.body).not("li").on("dblclick", function(e) {
+      e.preventDefault();
+      return vent.trigger('zoomToFit');
     });
     checkKey = function(e) {
       e || e.preventDefault();
@@ -181,6 +200,12 @@
       Node.prototype.zoomToNode = function() {
         var zoom;
         window.Transform.zoom = zoom = 1;
+        if (this.model.attributes.imageSize) {
+          window.Transform.deltaX = $('body').width() / 2 - this.model.get('left') - this.$el.find('img').width() / zoom / 2;
+          window.Transform.deltaY = $('body').height() / 2 - this.model.get('top') - this.$el.find('img').height() / zoom / 2;
+          vent.trigger('zoom');
+          return;
+        }
         window.Transform.deltaX = $('body').width() / 2 - this.model.get('left') - this.$el.find('.text').width() / zoom / 2;
         window.Transform.deltaY = $('body').height() / 2 - this.model.get('top') - this.$el.find('.text').height() / zoom / 2;
         return vent.trigger('zoom');
@@ -360,7 +385,45 @@
 
       NodesCollection.prototype.initialize = function() {
         this.collection.on('add', this.addOne, this);
-        return this.collection.on('remove', this.removeOne, this);
+        this.collection.on('remove', this.removeOne, this);
+        return vent.on('zoomToFit', this.zoomToFit, this);
+      };
+
+      NodesCollection.prototype.zoomToFit = function() {
+        var height, heightZoom, maxX, maxY, minX, minY, width, widthZoom;
+        minX = null;
+        maxX = null;
+        minY = null;
+        maxY = null;
+        this.collection.each(function(model) {
+          var x, y;
+          x = Math.round(model.get('left'));
+          y = Math.round(model.get('top'));
+          if (!minX || x < minX) {
+            minX = x;
+          }
+          if (!maxX || x > maxX) {
+            maxX = x;
+          }
+          if (!minY || y < minY) {
+            minY = y;
+          }
+          if (!maxY || y > maxY) {
+            return maxY = y;
+          }
+        });
+        width = maxX - minX;
+        height = maxY - minY;
+        widthZoom = $('body').width() / width;
+        heightZoom = $('body').height() / height;
+        if (widthZoom < heightZoom) {
+          window.Transform.zoom = widthZoom;
+        } else {
+          window.Transform.zoom = heightZoom;
+        }
+        window.Transform.deltaX = $('body').width() / 2;
+        window.Transform.deltaY = $('body').height() / 2;
+        return vent.trigger('zoom');
       };
 
       NodesCollection.prototype.rerender = function() {

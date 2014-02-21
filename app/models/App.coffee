@@ -47,19 +47,37 @@
         window.mouse.down = false
   )
 
+  $(document.body).on("DOMMouseScroll mousewheel wheel", (e) ->
+    e.preventDefault()
+    if e.originalEvent.deltaY > 0  #fingers going up  --> zoom in
+      window.Transform.centerX = $('body').width() / 2
+      window.Transform.centerY = $('body').height() / 2
+      window.Transform.zoom *= 1.2
+      vent.trigger('zoom')
+      console.log("Zoom in " + window.Transform.zoom)
+    else if e.originalEvent.deltaY < 0  #fingers going down
+      window.Transform.centerX = $('body').width() / 2
+      window.Transform.centerY = $('body').height() / 2
+      window.Transform.zoom *= .8
+      vent.trigger('zoom')
+      console.log("Zoom out " + window.Transform.zoom)
+  )
+
   $(document.body).on("mouseup", (event) ->
-    console.log("mouseup is #{window.mouse.x}, #{window.mouse.y}")
     window.selectedNode.modelView = null
     window.mouse.down = false
   )
 
-  $(document.body).on("mousedown", (e) ->
+  $(document.body).on "mousedown", (e) ->
+    e.preventDefault()
     if !window.selectedNode.modelView
       window.mouse.down = true
       window.mouse.x = e.pageX
       window.mouse.y = e.pageY
-      console.log("mousedown is #{window.mouse.x}, #{window.mouse.y}")
-  )
+
+  $(document.body).not("li").on "dblclick", (e) ->
+    e.preventDefault()
+    vent.trigger('zoomToFit')
 
   checkKey = (e) ->
     e || e.preventDefault()
@@ -157,6 +175,11 @@
 
     zoomToNode: () ->
       window.Transform.zoom = zoom = 1
+      if @.model.attributes.imageSize
+        window.Transform.deltaX = $('body').width() / 2 - @.model.get('left') - @.$el.find('img').width() / zoom / 2
+        window.Transform.deltaY = $('body').height() / 2 - @.model.get('top') - @.$el.find('img').height() / zoom / 2
+        vent.trigger('zoom')
+        return
       window.Transform.deltaX = $('body').width() / 2 - @.model.get('left') - @.$el.find('.text').width() / zoom / 2
       window.Transform.deltaY = $('body').height() / 2 - @.model.get('top') - @.$el.find('.text').height() / zoom / 2
       vent.trigger('zoom')
@@ -285,7 +308,40 @@
     initialize: () ->
       @.collection.on('add', @.addOne, @)
       @.collection.on('remove', @.removeOne, @)
-      # vent.on('newTransform', @.render, @)
+      vent.on('zoomToFit', @.zoomToFit, @)
+
+    zoomToFit: () ->
+      #get min and max X
+      #get min and max Y
+      minX = null
+      maxX = null
+      minY = null
+      maxY = null
+      @.collection.each (model) ->
+        x = Math.round model.get('left')
+        y = Math.round model.get('top')
+        if !(minX) || x < minX
+          minX = x
+        if !(maxX) || x > maxX
+          maxX = x
+        if !(minY) || y < minY
+          minY = y
+        if !(maxY) || y > maxY
+          maxY = y
+      width = maxX - minX
+      height = maxY - minY
+      
+      widthZoom = $('body').width() / width
+      heightZoom = $('body').height() / height
+      if widthZoom < heightZoom
+        window.Transform.zoom = widthZoom
+      else
+        window.Transform.zoom = heightZoom
+      # debugger
+      window.Transform.deltaX = $('body').width() / 2
+      window.Transform.deltaY = $('body').height() / 2
+      vent.trigger('zoom')
+      #debugger
 
     rerender: () ->
       @.collection.each( (node) -> 
