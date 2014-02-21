@@ -68,11 +68,13 @@
         return console.log("Zoom out " + window.Transform.zoom);
       }
     });
-    $(document.body).on("mouseup", function(event) {
+    $(document.body).on("mouseup", function(e) {
+      e.preventDefault;
       window.selectedNode.modelView = null;
       return window.mouse.down = false;
     });
-    $(document.body).on("mousedown", function(e) {
+    $(document.body).not('#addNote textarea div#inner-editor div#placeholder').on("mousedown", function(e) {
+      console.log('halo vvorld');
       e.preventDefault();
       if (!window.selectedNode.modelView) {
         window.mouse.down = true;
