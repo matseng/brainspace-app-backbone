@@ -11,8 +11,8 @@
     offsetY: 0
   }
   window.Transform = {
-    deltaX: 0
-    deltaY: 0
+    deltaX: 0  #ie panX
+    deltaY: 0  #ie panY
     zoom: 1.0
     centerX: 0
     centerY: 0
@@ -130,7 +130,7 @@
       distFromCenterX = x - window.Transform.centerX
       distFromCenterY = y - window.Transform.centerY
       transX = window.Transform.centerX + (x - window.Transform.centerX) * 1 / zoom
-      transY = window.Transform.centerY + (y - window.Transform.centerY) * 1 / zoom      
+      transY = window.Transform.centerY + (y - window.Transform.centerY) * 1 / zoom
       @.set({"left": transX - window.Transform.deltaX})
       @.set({"top": transY - window.Transform.deltaY})
 
@@ -154,7 +154,15 @@
       'mouseenter': 'mouseenter'
       'mouseleave': 'mouseleave'
       'change .imageSizeSelector': 'changeImageSize'
+      'dblclick' : 'zoomToNode'
     }
+
+    zoomToNode: () ->
+      window.Transform.zoom = zoom = 1
+      window.Transform.deltaX = $('body').width() / 2 - @.model.get('left') - @.$el.find('.text').width() / zoom / 2
+      window.Transform.deltaY = $('body').height() / 2 - @.model.get('top') - @.$el.find('.text').height() / zoom / 2
+      debugger
+      vent.trigger('zoom')
 
     changeImageSize: (e) ->
       #if this nodeView has an image...
@@ -186,6 +194,8 @@
 
     mouseleave: () ->
       @.$el.find('.nodeMenu').css('visibility', 'hidden')
+      @.$el.find('.imageSizeContainer').css('visibility', 'hidden')
+
 
     mouseDownSelectNode: (e) ->
       #e.preventDefault()

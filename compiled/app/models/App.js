@@ -174,7 +174,17 @@
         'mousedown': 'mouseDownSelectNode',
         'mouseenter': 'mouseenter',
         'mouseleave': 'mouseleave',
-        'change .imageSizeSelector': 'changeImageSize'
+        'change .imageSizeSelector': 'changeImageSize',
+        'dblclick': 'zoomToNode'
+      };
+
+      Node.prototype.zoomToNode = function() {
+        var zoom;
+        window.Transform.zoom = zoom = 1;
+        window.Transform.deltaX = $('body').width() / 2 - this.model.get('left') - this.$el.find('.text').width() / zoom / 2;
+        window.Transform.deltaY = $('body').height() / 2 - this.model.get('top') - this.$el.find('.text').height() / zoom / 2;
+        debugger;
+        return vent.trigger('zoom');
       };
 
       Node.prototype.changeImageSize = function(e) {
@@ -214,7 +224,8 @@
       };
 
       Node.prototype.mouseleave = function() {
-        return this.$el.find('.nodeMenu').css('visibility', 'hidden');
+        this.$el.find('.nodeMenu').css('visibility', 'hidden');
+        return this.$el.find('.imageSizeContainer').css('visibility', 'hidden');
       };
 
       Node.prototype.mouseDownSelectNode = function(e) {
