@@ -73,13 +73,15 @@
       window.selectedNode.modelView = null;
       return window.mouse.down = false;
     });
-    $(document.body).not('#addNote textarea div#inner-editor div#placeholder').on("mousedown", function(e) {
-      console.log('halo vvorld');
-      e.preventDefault();
-      if (!window.selectedNode.modelView) {
-        window.mouse.down = true;
-        window.mouse.x = e.pageX;
-        return window.mouse.y = e.pageY;
+    $(document.body).on("mousedown", function(e) {
+      if (e.target.tagName === "BODY") {
+        console.log('halo vvorld');
+        e.preventDefault();
+        if (!window.selectedNode.modelView) {
+          window.mouse.down = true;
+          window.mouse.x = e.pageX;
+          return window.mouse.y = e.pageY;
+        }
       }
     });
     $(document.body).not("li").on("dblclick", function(e) {

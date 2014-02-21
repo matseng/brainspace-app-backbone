@@ -70,13 +70,14 @@
   )
 
   #$("body :input:not(:text, textarea)").on("mousedown", (e) ->  #not() does NOT appear to be working!!
-  $(document.body).not('#addNote textarea div#inner-editor div#placeholder').on("mousedown", (e) ->  #not() does NOT appear to be working!!
-    console.log('halo vvorld')
-    e.preventDefault()  #blocks form somehow
-    if !window.selectedNode.modelView
-      window.mouse.down = true
-      window.mouse.x = e.pageX
-      window.mouse.y = e.pageY
+  $(document.body).on("mousedown", (e) ->  #not() does NOT appear to be working!!
+    if e.target.tagName == "BODY"
+      console.log('halo vvorld')
+      e.preventDefault()  #blocks form somehow
+      if !window.selectedNode.modelView
+        window.mouse.down = true
+        window.mouse.x = e.pageX
+        window.mouse.y = e.pageY
   )
 
   $(document.body).not("li").on "dblclick", (e) ->
