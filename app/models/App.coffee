@@ -75,9 +75,9 @@
       window.mouse.x = e.pageX
       window.mouse.y = e.pageY
 
-  $(document.body).not("li").on "dblclick", (e) ->
-    e.preventDefault()
-    vent.trigger('zoomToFit')
+  # $(document.body).not("li").on "dblclick", (e) ->
+  #   e.preventDefault()
+  #   vent.trigger('zoomToFit')
 
   checkKey = (e) ->
     e || e.preventDefault()
