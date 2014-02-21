@@ -144,12 +144,10 @@
       @.model.on('destroy', @.remove, @)
       vent.on('pan', @.zoom, @)
       vent.on('zoom', @.zoom, @)
-      #$('.imageSizeSelector').on('change', @.changeImageSize, @)
 
     events: {
       'click .edit': 'editNode'
       'click .delete': 'deleteNode'
-      # 'mousedown span': 'mouseDownSelectNode'
       'mousedown': 'mouseDownSelectNode'
       'mouseenter': 'mouseenter'
       'mouseleave': 'mouseleave'
@@ -161,7 +159,6 @@
       window.Transform.zoom = zoom = 1
       window.Transform.deltaX = $('body').width() / 2 - @.model.get('left') - @.$el.find('.text').width() / zoom / 2
       window.Transform.deltaY = $('body').height() / 2 - @.model.get('top') - @.$el.find('.text').height() / zoom / 2
-      debugger
       vent.trigger('zoom')
 
     changeImageSize: (e) ->

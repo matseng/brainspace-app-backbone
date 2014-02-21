@@ -183,7 +183,6 @@
         window.Transform.zoom = zoom = 1;
         window.Transform.deltaX = $('body').width() / 2 - this.model.get('left') - this.$el.find('.text').width() / zoom / 2;
         window.Transform.deltaY = $('body').height() / 2 - this.model.get('top') - this.$el.find('.text').height() / zoom / 2;
-        debugger;
         return vent.trigger('zoom');
       };
 
