@@ -80,9 +80,10 @@
         window.mouse.y = e.pageY
   )
 
-  $(document.body).not("li").on "dblclick", (e) ->
-    e.preventDefault()
-    vent.trigger('zoomToFit')
+  $(document.body).on "dblclick", (e) ->
+    if e.target.tagName == "BODY"
+      e.preventDefault()
+      vent.trigger('zoomToFit')
 
   checkKey = (e) ->
     e || e.preventDefault()
@@ -133,7 +134,7 @@
   pasteHandler = (e) ->
     vent.trigger('pasteImage', e)  #e becomes an arguement that gets passed to callback contained in listeners
     
-  window.addEventListener("paste", pasteHandler)
+  window.addEventListener("paste", pasteHandler)  # paste is a special event (i.e. Command-v) 
 
   class App.Models.Node extends Backbone.Model
     defaults: {
@@ -179,7 +180,8 @@
     }
 
     zoomToNode: () ->
-      window.Transform.zoom = zoom = 1
+      window.Transform.zoom = 1
+      zoom = 1
       if @.model.attributes.imageSize
         window.Transform.deltaX = $('body').width() / 2 - @.model.get('left') - @.$el.find('img').width() / zoom / 2
         window.Transform.deltaY = $('body').height() / 2 - @.model.get('top') - @.$el.find('img').height() / zoom / 2
@@ -272,9 +274,6 @@
       @.model.set({"top": transY - window.Transform.deltaY})
 
     update: () ->
-      #template = @.template(@.model.toJSON())
-      #@.$el.html(template)
-      #@.$el.css('position', 'absolute')
       if(@.model.changedAttributes().text)
         newPromptText = @.model.get('text')
         @.$el.find('.text').text(newPromptText)
@@ -302,7 +301,6 @@
       @.zoom()
       @
 
-  #class App.Collections.Nodes extends Backbone.Collection
   class App.Collections.Nodes extends Backbone.Firebase.Collection
     model: App.Models.Node
     firebase: new Firebase('https://resplendent-fire-9007.firebaseio.com/')
@@ -316,9 +314,7 @@
       vent.on('zoomToFit', @.zoomToFit, @)
 
     zoomToFit: () ->
-      #get min and max X
-      #get min and max Y
-      minX = null
+      minX = null  # Is there a better way to write this in CoffeeScript?
       maxX = null
       minY = null
       maxY = null
@@ -342,15 +338,12 @@
         window.Transform.zoom = widthZoom
       else
         window.Transform.zoom = heightZoom
-      # debugger
       window.Transform.deltaX = $('body').width() / 2
       window.Transform.deltaY = $('body').height() / 2
       vent.trigger('zoom')
-      #debugger
 
     rerender: () ->
       @.collection.each( (node) -> 
-        #debugger
         node.render()
       , @)
 
@@ -359,24 +352,20 @@
       @  #returns this view
     
     addOne: (node) ->
-      #console.log(node.toJSON())
       nodeView = new App.Views.Node({model: node})
-      #debugger
       nodeView.$el.attr("id", node.id)
       @.$el.prepend(nodeView.render().el)
-      nodeView.render()  #Bug requires second render invocation
+      nodeView.render()  # Bug requires second render invocation  => Likely bc nodes need to be rendered to DOM before CSS properties are accessible (e.g. width()) 
 
     removeOne: (model, coll, opt) ->
       $("#" + model.id).detach()
 
   class App.Views.AddNode extends Backbone.View
-    #el: '#addNote'
     el: '#inputContainer'
     
     events: {
       'submit #addNote': 'submit'
       'change #file-upload': 'fileUpload'
-
     }
 
     initialize: () ->

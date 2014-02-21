@@ -84,9 +84,11 @@
         }
       }
     });
-    $(document.body).not("li").on("dblclick", function(e) {
-      e.preventDefault();
-      return vent.trigger('zoomToFit');
+    $(document.body).on("dblclick", function(e) {
+      if (e.target.tagName === "BODY") {
+        e.preventDefault();
+        return vent.trigger('zoomToFit');
+      }
     });
     checkKey = function(e) {
       e || e.preventDefault();
@@ -203,7 +205,8 @@
 
       Node.prototype.zoomToNode = function() {
         var zoom;
-        window.Transform.zoom = zoom = 1;
+        window.Transform.zoom = 1;
+        zoom = 1;
         if (this.model.attributes.imageSize) {
           window.Transform.deltaX = $('body').width() / 2 - this.model.get('left') - this.$el.find('img').width() / zoom / 2;
           window.Transform.deltaY = $('body').height() / 2 - this.model.get('top') - this.$el.find('img').height() / zoom / 2;
