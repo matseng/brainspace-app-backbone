@@ -4,7 +4,7 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   (function() {
-    var addNodeView, checkKey, collectionNodes, nodeCollectionView, pasteHandler, vent;
+    var addNodeView, checkKey, collectionNodes, menuView, nodeCollectionView, pasteHandler, vent;
     window.App = {
       Models: {},
       Collections: {},
@@ -26,6 +26,9 @@
       down: false,
       x: 0,
       y: 0
+    };
+    window.button = {
+      selected: 'explore'
     };
     vent = _.extend({}, Backbone.Events);
     window.template = function(id) {
@@ -75,7 +78,6 @@
     });
     $(document.body).on("mousedown", function(e) {
       if (e.target.tagName === "BODY") {
-        console.log('halo vvorld');
         e.preventDefault();
         if (!window.selectedNode.modelView) {
           window.mouse.down = true;
@@ -88,6 +90,12 @@
       if (e.target.tagName === "BODY") {
         e.preventDefault();
         return vent.trigger('zoomToFit');
+      }
+    });
+    $(document.body).on('click', function(e) {
+      if (e.target.tagName === 'BODY' || e.target.tagName === 'li') {
+        e.preventDefault();
+        return vent.trigger(window.button.selected, e);
       }
     });
     checkKey = function(e) {
@@ -468,15 +476,18 @@
         return AddNode.__super__.constructor.apply(this, arguments);
       }
 
-      AddNode.prototype.el = '#inputContainer';
+      AddNode.prototype.el = '.inputContainer';
+
+      AddNode.prototype.template = template('newNoteTemplate');
 
       AddNode.prototype.events = {
-        'submit #addNote': 'submit',
+        'submit': 'submit',
         'change #file-upload': 'fileUpload'
       };
 
       AddNode.prototype.initialize = function() {
-        return vent.on('pasteImage', this.pasteImage, this);
+        vent.on('pasteImage', this.pasteImage, this);
+        return vent.on('newNote', this.showNoteInputField, this);
       };
 
       AddNode.prototype.fileUpload = function(evt) {
@@ -497,6 +508,25 @@
           };
         })(f);
         return reader.readAsDataURL(f);
+      };
+
+      AddNode.prototype.showNoteInputField = function(e) {
+        var $textarea, temp, x, y;
+        x = e.pageX;
+        y = e.pageY;
+        temp = this.template();
+        console.log(typeof temp);
+        this.$el.html(this.template());
+        $('body').append(this.$el);
+        $textarea = this.$el.find('textarea');
+        $textarea.focus();
+        return $textarea.on('focusout', function(e) {
+          if (this.value === "") {
+            return $(e.target).parent().css({
+              visibility: 'hidden'
+            });
+          }
+        });
       };
 
       AddNode.prototype.submit = function(e) {
@@ -546,8 +576,32 @@
       return AddNode;
 
     })(Backbone.View);
+    App.Views.MenuView = (function(_super) {
+      __extends(MenuView, _super);
+
+      function MenuView() {
+        return MenuView.__super__.constructor.apply(this, arguments);
+      }
+
+      MenuView.prototype.el = '#menuContainer';
+
+      MenuView.prototype.events = {
+        'click .menuButton': 'menuButtonClicked'
+      };
+
+      MenuView.prototype.menuButtonClicked = function(e) {
+        window.button.selected = e.target.id;
+        return console.log(window.button.selected);
+      };
+
+      return MenuView;
+
+    })(Backbone.View);
     collectionNodes = new App.Collections.Nodes();
     addNodeView = new App.Views.AddNode({
+      collection: collectionNodes
+    });
+    menuView = new App.Views.MenuView({
       collection: collectionNodes
     });
     nodeCollectionView = new App.Views.NodesCollection({

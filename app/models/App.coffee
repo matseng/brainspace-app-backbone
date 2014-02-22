@@ -23,6 +23,10 @@
     y: 0
   }
 
+  window.button = {
+    selected: 'explore'
+  }
+
   vent = _.extend({}, Backbone.Events)
 
   window.template = (id) ->
@@ -72,7 +76,6 @@
   #$("body :input:not(:text, textarea)").on("mousedown", (e) ->  #not() does NOT appear to be working!!
   $(document.body).on("mousedown", (e) ->  #not() does NOT appear to be working!!
     if e.target.tagName == "BODY"
-      console.log('halo vvorld')
       e.preventDefault()  #blocks form somehow
       if !window.selectedNode.modelView
         window.mouse.down = true
@@ -84,6 +87,11 @@
     if e.target.tagName == "BODY"
       e.preventDefault()
       vent.trigger('zoomToFit')
+
+  $(document.body).on 'click', (e) ->
+    if e.target.tagName == 'BODY' || e.target.tagName == 'li'
+      e.preventDefault()
+      vent.trigger(window.button.selected, e)  # e available to event listeners
 
   checkKey = (e) ->
     e || e.preventDefault()
@@ -361,16 +369,19 @@
       $("#" + model.id).detach()
 
   class App.Views.AddNode extends Backbone.View
-    el: '#inputContainer'
+    el: '.inputContainer'
+
+    template: template('newNoteTemplate')
     
     events: {
-      'submit #addNote': 'submit'
+      'submit': 'submit'
       'change #file-upload': 'fileUpload'
     }
 
     initialize: () ->
       vent.on('pasteImage', @.pasteImage, @)
-      
+      vent.on('newNote', @.showNoteInputField, @)
+    
     fileUpload: (evt) ->
       that = @
       f = evt.target.files[0]
@@ -387,6 +398,21 @@
       )(f)
       reader.readAsDataURL(f)
 
+    showNoteInputField: (e) ->
+      x = e.pageX
+      y = e.pageY
+      #$el = $('<div></div>')
+      temp = @.template()
+      console.log(typeof temp);
+      
+      @.$el.html(@.template())
+      $('body').append(@.$el)
+      $textarea = @.$el.find('textarea')
+      $textarea.focus()
+      $textarea.on 'focusout', (e) ->
+        if @.value == ""
+          $(e.target).parent().css({visibility: 'hidden'});
+
     submit: (e) ->
       e.preventDefault()
       text = $(e.currentTarget).find('textarea[name=text]').val()
@@ -397,7 +423,7 @@
         username: username || 'anonymous'
       })
       @.collection.add(node)
-      #vent.trigger('zoom')
+
     pasteImage: (event) ->
       that = @
       clipboardData = event.clipboardData  ||  event.originalEvent.clipboardData
@@ -423,11 +449,21 @@
           that.collection.add(node)
         reader.readAsDataURL(blob)
 
- 
+  class App.Views.MenuView extends Backbone.View
+    el: '#menuContainer'
+
+    events: {
+      'click .menuButton': 'menuButtonClicked'
+    }
+
+    menuButtonClicked: (e) ->
+      window.button.selected = e.target.id
+      console.log(window.button.selected)
 
   #nodeView = new App.Views.Node({model: new App.Model.Node()})
   collectionNodes = new App.Collections.Nodes()
   addNodeView = new App.Views.AddNode({collection: collectionNodes})
+  menuView = new App.Views.MenuView({collection: collectionNodes})
   nodeCollectionView = new App.Views.NodesCollection({collection: collectionNodes})
   $(".nodes").append(nodeCollectionView.render().el)
 

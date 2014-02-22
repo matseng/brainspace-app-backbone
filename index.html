@@ -5,19 +5,42 @@
   </head>
   <body>
     <h1> BrainSpace</h1>
-    <div id="inputContainer">
-      <form id="addNote">
+    <div id="menuContainer">
+      <div>
+        <input type='text' placeholder='Search'>
+        <button>Settings</button>
+      </div>
+      <div>
+        <button id='explore' class='menuButton'>Explore</button>
+        <button id='newNote' class='menuButton'>New Note</button>
+        <button id='drawGroup' class='menuButton'>Draw Group</button>
+        <button class='menuButton'>Draw Arrow</button>
+        <button class='menuButton'>Undo / Redo</button>
+        <input type="file" accept="image/*" capture="camera" id="file-upload"> 
+        <button>Share</button>
+      </div>
+    </div>
+    <div class="inputContainer">
+      <form class="addNote">
         <textarea name='text' rows='3' cols="35" placeholder="Your new note"></textarea>
         <input name='username' type="text" placeholder="Your name">
         <input type="submit" value="Add note">
       </form>
-      <input type="file" accept="image/*" capture="camera" id="file-upload"> 
     </div>
     <div>
       <span> <strong>i</strong> to zoom in </span> </br>
       <span> <strong>o</strong> to zoom out </span>
     </div>
-    <div class='nodes'> </div>
+    <div class='nodes'></div>
+    <script id="newNoteTemplate" type="text/template">
+      <div class="inputContainer">
+        <form class="addNote">
+          <textarea name='text' rows='3' cols="35" placeholder="Your new note"></textarea>
+          <input name='username' type="text" placeholder="Your name">
+          <input type="submit" value="Add note">
+        </form>
+      </div>
+    </script>
     <script id="nodeTemplate" type="text/template"> 
       <div>
         <strong><span class='text'><%= text %></span></strong> 
