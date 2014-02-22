@@ -543,7 +543,6 @@
           $textarea.focus();
           return $textarea.on('focusout', function(e) {
             if (this.value === "") {
-              debugger;
               return $(e.target).parent().css({
                 visibility: 'hidden'
               });

@@ -434,7 +434,6 @@
         $textarea.focus()
         $textarea.on 'focusout', (e) ->
           if @.value == ""
-            debugger
             $(e.target).parent().css({visibility: 'hidden'});
 
     submit: (e) ->
