@@ -3,7 +3,11 @@ body, html {
   overflow-y: hidden; 
 }
 
-li{
+h1 {
+  display: inline;
+}
+
+li {
   white-space: nowrap;
 }
 

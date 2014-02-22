@@ -25,7 +25,8 @@
     window.mouse = {
       down: false,
       x: 0,
-      y: 0
+      y: 0,
+      timeStamp: 0
     };
     window.button = {
       selected: 'explore'
@@ -33,6 +34,18 @@
     vent = _.extend({}, Backbone.Events);
     window.template = function(id) {
       return _.template($("#" + id).html());
+    };
+    window.getAbsCoorFromPageXY = function(x, y) {
+      var distFromCenterX, distFromCenterY, transX, transY, xy, zoom;
+      zoom = window.Transform.zoom;
+      distFromCenterX = x - window.Transform.centerX;
+      distFromCenterY = y - window.Transform.centerY;
+      transX = window.Transform.centerX + (x - window.Transform.centerX) * 1 / zoom;
+      transY = window.Transform.centerY + (y - window.Transform.centerY) * 1 / zoom;
+      return xy = {
+        "left": transX - window.Transform.deltaX,
+        "top": transY - window.Transform.deltaY
+      };
     };
     $(document.body).mousemove(function(event) {
       var panX, panY, selectedNodeView;
@@ -77,6 +90,7 @@
       return window.mouse.down = false;
     });
     $(document.body).on("mousedown", function(e) {
+      window.mouse.timeStamp = e.timeStamp;
       if (e.target.tagName === "BODY") {
         e.preventDefault();
         if (!window.selectedNode.modelView) {
@@ -512,34 +526,51 @@
 
       AddNode.prototype.showNoteInputField = function(e) {
         var $textarea, temp, x, y;
-        x = e.pageX;
-        y = e.pageY;
-        temp = this.template();
-        console.log(typeof temp);
-        this.$el.html(this.template());
-        $('body').append(this.$el);
-        $textarea = this.$el.find('textarea');
-        $textarea.focus();
-        return $textarea.on('focusout', function(e) {
-          if (this.value === "") {
-            return $(e.target).parent().css({
-              visibility: 'hidden'
-            });
-          }
-        });
+        if (e.timeStamp - window.mouse.timeStamp < 500) {
+          x = e.pageX;
+          y = e.pageY;
+          temp = this.template();
+          console.log(typeof temp);
+          this.$el.html(this.template());
+          this.$el.css('position', 'absolute');
+          this.$el.css({
+            left: x,
+            top: y
+          });
+          this.$el.css('visibility', 'visible');
+          $('body').append(this.$el);
+          $textarea = this.$el.find('textarea');
+          $textarea.focus();
+          return $textarea.on('focusout', function(e) {
+            if (this.value === "") {
+              debugger;
+              return $(e.target).parent().css({
+                visibility: 'hidden'
+              });
+            }
+          });
+        }
       };
 
       AddNode.prototype.submit = function(e) {
-        var node, text, username;
+        var left, node, text, top, username, xy;
         e.preventDefault();
         text = $(e.currentTarget).find('textarea[name=text]').val();
         text = text.replace(/\n/g, '<br>');
         username = $(e.currentTarget).find('input[name=username]').val();
+        top = $(e.currentTarget).position().top;
+        left = $(e.currentTarget).position().left;
+        xy = window.getAbsCoorFromPageXY(left, top);
         node = new App.Models.Node({
           text: text || "empty",
-          username: username || 'anonymous'
+          username: username || 'anonymous',
+          top: xy.top,
+          left: xy.left
         });
-        return this.collection.add(node);
+        this.collection.add(node);
+        return $(e.currentTarget).css({
+          visibility: 'hidden'
+        });
       };
 
       AddNode.prototype.pasteImage = function(event) {

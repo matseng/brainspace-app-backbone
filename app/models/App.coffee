@@ -21,6 +21,7 @@
     down: false
     x: 0
     y: 0
+    timeStamp: 0
   }
 
   window.button = {
@@ -31,6 +32,23 @@
 
   window.template = (id) ->
     _.template($("#" + id).html())
+
+  window.getAbsCoorFromPageXY = (x, y) ->
+    #calcuate relative coor from window coordinates
+    #then calc absX, absY from relative coor
+    #return obj {left: absX, top: absY}
+    # absX = (x - window.Transform.deltaX) * 1 / window.Transform.zoom
+    # absY = (y - window.Transform.deltaY) * 1 / window.Transform.zoom
+    # xy = {left: absX, top: absY}
+    zoom = window.Transform.zoom
+    distFromCenterX = x - window.Transform.centerX
+    distFromCenterY = y - window.Transform.centerY
+    transX = window.Transform.centerX + (x - window.Transform.centerX) * 1 / zoom
+    transY = window.Transform.centerY + (y - window.Transform.centerY) * 1 / zoom
+    xy = {
+      "left": transX - window.Transform.deltaX,
+      "top": transY - window.Transform.deltaY
+    }
 
   $(document.body).mousemove( (event) -> 
     event.preventDefault()
@@ -75,6 +93,7 @@
 
   #$("body :input:not(:text, textarea)").on("mousedown", (e) ->  #not() does NOT appear to be working!!
   $(document.body).on("mousedown", (e) ->  #not() does NOT appear to be working!!
+    window.mouse.timeStamp = e.timeStamp
     if e.target.tagName == "BODY"
       e.preventDefault()  #blocks form somehow
       if !window.selectedNode.modelView
@@ -91,7 +110,7 @@
   $(document.body).on 'click', (e) ->
     if e.target.tagName == 'BODY' || e.target.tagName == 'li'
       e.preventDefault()
-      vent.trigger(window.button.selected, e)  # e available to event listeners
+      vent.trigger(window.button.selected, e)  # e made available to event listeners
 
   checkKey = (e) ->
     e || e.preventDefault()
@@ -399,30 +418,41 @@
       reader.readAsDataURL(f)
 
     showNoteInputField: (e) ->
-      x = e.pageX
-      y = e.pageY
-      #$el = $('<div></div>')
-      temp = @.template()
-      console.log(typeof temp);
-      
-      @.$el.html(@.template())
-      $('body').append(@.$el)
-      $textarea = @.$el.find('textarea')
-      $textarea.focus()
-      $textarea.on 'focusout', (e) ->
-        if @.value == ""
-          $(e.target).parent().css({visibility: 'hidden'});
+      if e.timeStamp - window.mouse.timeStamp < 500  # Show note input field if the click was less than 500 ms
+        x = e.pageX
+        y = e.pageY
+        temp = @.template()
+        console.log(typeof temp);
+        # @.$el = $("<div></div>")
+        
+        @.$el.html(@.template())  # requires $el to have a tag, ie $el can't be empty... remove parent (the extra div)?
+        @.$el.css('position', 'absolute')
+        @.$el.css({left: x, top: y})
+        @.$el.css('visibility', 'visible')
+        $('body').append(@.$el)
+        $textarea = @.$el.find('textarea')
+        $textarea.focus()
+        $textarea.on 'focusout', (e) ->
+          if @.value == ""
+            debugger
+            $(e.target).parent().css({visibility: 'hidden'});
 
     submit: (e) ->
       e.preventDefault()
       text = $(e.currentTarget).find('textarea[name=text]').val()
       text = text.replace(/\n/g, '<br>')
       username = $(e.currentTarget).find('input[name=username]').val()
+      top = $(e.currentTarget).position().top  #get x,y from the position of the form input field
+      left = $(e.currentTarget).position().left
+      xy = window.getAbsCoorFromPageXY(left, top)  # xy is an obj {left: X, top: Y}
       node = new App.Models.Node({
         text: text || "empty"
         username: username || 'anonymous'
-      })
+        top: xy.top
+        left: xy.left
+      })      
       @.collection.add(node)
+      $(e.currentTarget).css({visibility: 'hidden'})  # Hide form input field, but this invocation should only be called if the node was successfully added
 
     pasteImage: (event) ->
       that = @
