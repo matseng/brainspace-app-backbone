@@ -1,0 +1,22 @@
+{
+  "name": "BrainSpace-Angular",
+  "version": "0.0.1",
+  "authors": [
+    "Michael Tseng"
+  ],
+  "description": "Collaborative Note Taking",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.2.12",
+    "angular-route": "~1.2.13",
+    "angular-bootstrap": "~0.10.0",
+    "underscore": "~1.6.0"
+  }
+}
