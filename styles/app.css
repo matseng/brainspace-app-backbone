@@ -9,7 +9,7 @@ body, html {
   border-style: solid;
 }
 
-#notesContainer {
+.nodes {
   border: 2;
   border-style: solid;
 }
