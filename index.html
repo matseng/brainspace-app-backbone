@@ -12,28 +12,30 @@
         <button>Settings</button>
       </div>
       <div>
-        <button id='explore' class='menuButton'>Explore</button>
-        <button id='newNote' class='menuButton'>New Note</button>
-        <button id='drawGroup' class='menuButton'>Draw Group</button>
+        <input type='radio' name='options' id='explore' class='menuButton' checked >Explore</button>
+        <label><input type='radio' name='options' id='newNote' class='menuButton'>New Note</button></label>
+        <input type='radio' name='options' id='drawGroup' class='menuButton'>Draw Group</button>
         <button class='menuButton'>Draw Arrow</button>
         <button class='menuButton'>Undo / Redo</button>
         <input type="file" accept="image/*" capture="camera" id="file-upload"> 
         <button>Share</button>
       </div>
     </div>
-    <div class="inputContainer">
-      <form class="addNote">
-        <textarea name='text' rows='3' cols="35" placeholder="Your new note"></textarea>
-        <br>
-        <input name='username' type="text" placeholder="Your name">
-        <input type="submit" value="Add note">
-      </form>
+    <div id='notesContainer'>
+      <div class="inputContainer">
+        <form class="addNote">
+          <textarea name='text' rows='3' cols="35" placeholder="Your new note"></textarea>
+          <br>
+          <input name='username' type="text" placeholder="Your name">
+          <input type="submit" value="Add note">
+        </form>
+      </div>
+      <div>
+        <span> <strong>i</strong> to zoom in </span> </br>
+        <span> <strong>o</strong> to zoom out </span>
+      </div>
+      <div class='nodes'></div>
     </div>
-    <div>
-      <span> <strong>i</strong> to zoom in </span> </br>
-      <span> <strong>o</strong> to zoom out </span>
-    </div>
-    <div class='nodes'></div>
     <script id="newNoteTemplate" type="text/template">
       <div class="inputContainer">
         <form class="addNote">
@@ -71,6 +73,7 @@
     <script src="https://cdn.firebase.com/libs/backfire/0.3.0/backbone-firebase.min.js"></script>
     <script src="lib/mousetrap.min.js"></script>
     <script src="compiled/app/models/App.js"></script>
+    <link rel="stylesheet" type="text/css" href="">
 
 <!--    <script src="compiled/app/views/AppView.js"></script>  
 

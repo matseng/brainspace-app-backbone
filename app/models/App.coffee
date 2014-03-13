@@ -1,4 +1,4 @@
-# $ coffee --output compiled --map --watch --compile .
+# $ coffee --output compiled --map --watch --compile app
 
 (() ->
   window.App = {

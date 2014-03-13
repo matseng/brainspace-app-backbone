@@ -3,6 +3,17 @@ body, html {
   overflow-y: hidden; 
 }
 
+#menuContainer {
+  /*position:fixed;*/
+  border: 2;
+  border-style: solid;
+}
+
+#notesContainer {
+  border: 2;
+  border-style: solid;
+}
+
 h1 {
   display: inline;
 }
